@@ -1,8 +1,12 @@
 # Environment variables
 .env
 
-.DS_Store
-
+./.DS_Store
 # Logs
 logs
 *.log
+
+./app/__pycache__
+./backend/migrations/__pycache__
+./backend/alembic/__pycache__
+./backend/alembic/__pycache__/*
