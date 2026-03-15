@@ -16,40 +16,31 @@ down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+# Define enums once — reused in upgrade() and downgrade()
+platform_enum = postgresql.ENUM("google", "reddit", "facebook", name="platform_enum")
+sentiment_label_enum = postgresql.ENUM("positive", "negative", "neutral", name="sentiment_label_enum")
+insight_type_enum = postgresql.ENUM(
+    "summary", "trend", "topic", "recommendation", name="insight_type_enum"
+)
+
 
 def upgrade() -> None:
+    bind = op.get_bind()
+
     # Enable pgvector extension
     op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
 
-    # -- Enums (DO block = safe against partial previous runs) --
-    op.execute("""
-        DO $$ BEGIN
-            CREATE TYPE platform_enum AS ENUM ('google', 'reddit', 'facebook');
-        EXCEPTION WHEN duplicate_object THEN NULL;
-        END $$;
-    """)
-    op.execute("""
-        DO $$ BEGIN
-            CREATE TYPE sentiment_label_enum AS ENUM ('positive', 'negative', 'neutral');
-        EXCEPTION WHEN duplicate_object THEN NULL;
-        END $$;
-    """)
-    op.execute("""
-        DO $$ BEGIN
-            CREATE TYPE insight_type_enum AS ENUM ('summary', 'trend', 'topic', 'recommendation');
-        EXCEPTION WHEN duplicate_object THEN NULL;
-        END $$;
-    """)
+    # Create enum types — checkfirst=True makes this idempotent
+    platform_enum.create(bind, checkfirst=True)
+    sentiment_label_enum.create(bind, checkfirst=True)
+    insight_type_enum.create(bind, checkfirst=True)
 
     # -- reviews --
     op.create_table(
         "reviews",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column(
-            "platform",
-            postgresql.ENUM("google", "reddit", "facebook", name="platform_enum", create_type=False),
-            nullable=False,
-        ),
+        # postgresql.ENUM with create_type=False — type already created above
+        sa.Column("platform", postgresql.ENUM("google", "reddit", "facebook", name="platform_enum", create_type=False), nullable=False),
         sa.Column("platform_id", sa.String(255), nullable=False),
         sa.Column("business_id", sa.String(255), nullable=False),
         sa.Column("business_name", sa.String(512), nullable=True),
@@ -65,24 +56,12 @@ def upgrade() -> None:
         ),
         sa.Column("topics", postgresql.ARRAY(sa.String()), nullable=True),
         sa.Column("is_processed", sa.Boolean(), nullable=False, server_default="false"),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
     )
     op.create_index("ix_reviews_platform", "reviews", ["platform"])
     op.create_index("ix_reviews_business_id", "reviews", ["business_id"])
-    op.create_unique_constraint(
-        "uq_reviews_platform_platform_id", "reviews", ["platform", "platform_id"]
-    )
+    op.create_unique_constraint("uq_reviews_platform_platform_id", "reviews", ["platform", "platform_id"])
 
     # -- review_embeddings --
     op.create_table(
@@ -95,18 +74,11 @@ def upgrade() -> None:
             nullable=False,
             unique=True,
         ),
-        sa.Column("embedding", Vector(3072), nullable=False),
-        sa.Column("model", sa.String(128), nullable=False, server_default="text-embedding-3-large"),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("embedding", Vector(1536), nullable=False),
+        sa.Column("model", sa.String(128), nullable=False, server_default="text-embedding-3-small"),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
     )
     op.create_index("ix_review_embeddings_review_id", "review_embeddings", ["review_id"])
-
-    # HNSW index for fast approximate nearest-neighbour search
     op.execute(
         "CREATE INDEX ix_review_embeddings_hnsw ON review_embeddings "
         "USING hnsw (embedding vector_cosine_ops);"
@@ -118,14 +90,7 @@ def upgrade() -> None:
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column(
             "insight_type",
-            postgresql.ENUM(
-                "summary",
-                "trend",
-                "topic",
-                "recommendation",
-                name="insight_type_enum",
-                create_type=False,
-            ),
+            postgresql.ENUM("summary", "trend", "topic", "recommendation", name="insight_type_enum", create_type=False),
             nullable=False,
         ),
         sa.Column("business_id", sa.String(255), nullable=False),
@@ -135,23 +100,20 @@ def upgrade() -> None:
         sa.Column("title", sa.String(512), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("extra_data", postgresql.JSONB(), nullable=True),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
     )
     op.create_index("ix_insights_insight_type", "insights", ["insight_type"])
     op.create_index("ix_insights_business_id", "insights", ["business_id"])
 
 
 def downgrade() -> None:
+    bind = op.get_bind()
+
     op.drop_table("insights")
-    op.drop_index("ix_review_embeddings_hnsw", table_name="review_embeddings")
+    op.execute("DROP INDEX IF EXISTS ix_review_embeddings_hnsw;")
     op.drop_table("review_embeddings")
     op.drop_table("reviews")
 
-    op.execute("DROP TYPE IF EXISTS insight_type_enum;")
-    op.execute("DROP TYPE IF EXISTS sentiment_label_enum;")
-    op.execute("DROP TYPE IF EXISTS platform_enum;")
+    insight_type_enum.drop(bind, checkfirst=True)
+    sentiment_label_enum.drop(bind, checkfirst=True)
+    platform_enum.drop(bind, checkfirst=True)

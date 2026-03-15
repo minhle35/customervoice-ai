@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     # OpenAI
     openai_api_key: str
-    openai_embedding_model: str = "text-embedding-3-large"
+    openai_embedding_model: str = "text-embedding-3-small"
     openai_chat_model: str = "gpt-4o-mini"
 
     # External APIs
