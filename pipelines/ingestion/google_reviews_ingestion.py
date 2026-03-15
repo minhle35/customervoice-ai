@@ -1,0 +1,2 @@
+# Google Reviews ingestion placeholder
+

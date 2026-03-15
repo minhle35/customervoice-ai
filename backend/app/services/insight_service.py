@@ -1,0 +1,2 @@
+# Insight generation logic (placeholder)
+

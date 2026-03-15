@@ -1,0 +1,2 @@
+// useInsights hook placeholder
+

@@ -1,0 +1,2 @@
+// Shared frontend types placeholder
+
