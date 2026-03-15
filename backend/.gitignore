@@ -1,12 +1,24 @@
 # Environment variables
 .env
 
-./.DS_Store
+.DS_Store
 # Logs
 logs
 *.log
 
 ./app/__pycache__
-./backend/migrations/__pycache__
-./backend/alembic/__pycache__
-./backend/alembic/__pycache__/*
+migrations/__pycache__
+alembic/__pycache__
+alembic/__pycache__/*
+
+# Models pycache
+app/models/__pycache__
+app/models/__pycache__/*
+
+app/__pycache__/*
+
+# Alembic pycache
+alembic/versions/__pycache__
+alembic/versions/__pycache__/*
+
+alembic/versions/__pycache__/*
