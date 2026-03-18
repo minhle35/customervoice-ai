@@ -12,6 +12,7 @@ services:
 
   redis:
     image: redis:7
+    command: redis-server --save "" --appendonly no
     ports:
       - "6379:6379"
 
@@ -19,22 +20,34 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     env_file: .env
     depends_on:
       - db
       - redis
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./workers:/app/workers
+      - ./pipelines:/app/pipelines
+      - backend_venv:/app/.venv
 
   worker:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    command: celery -A workers.celery_app worker --loglevel=INFO
+    command: celery -A workers.celery_app worker --loglevel=INFO --autoscale=4,1
     env_file: .env
     depends_on:
       - db
       - redis
+    volumes:
+      - ./backend:/app
+      - ./workers:/app/workers
+      - ./pipelines:/app/pipelines
+      - backend_venv:/app/.venv
 
 volumes:
   db_data:
+  backend_venv:
