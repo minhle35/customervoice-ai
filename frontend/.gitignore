@@ -1,2 +1,9 @@
 # node modules
 node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# next-env is auto-generated
+next-env.d.ts
