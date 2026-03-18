@@ -25,15 +25,19 @@ ENV UV_CACHE_DIR=/opt/uv-cache/
 
 RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=backend/pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=backend/uv.lock,target=uv.lock \
     uv sync \
         --no-install-project \
         --locked \
         --compile-bytecode
 
-# Copy project
-COPY . /app
+# Copy backend source
+COPY backend/ /app
+
+# Copy project-root modules needed at runtime
+COPY workers/ /app/workers/
+COPY pipelines/ /app/pipelines/
 
 # Install project itself
 RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \

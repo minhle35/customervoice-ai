@@ -19,10 +19,16 @@ dependencies = [
     # Async tasks
     "celery==5.4.0",
     "redis==5.1.1",
-    # OpenAI
+    # OpenAI (chat/LLM only — embeddings use sentence-transformers)
     "openai==1.51.0",
+    # Embeddings
+    "sentence-transformers>=3.0.0",
     # HTTP client
     "httpx==0.27.2",
+    # Ingestion + cleaning
+    "praw>=7.7.1",
+    "beautifulsoup4>=4.12",
+    "langdetect>=1.0.9",
     # Utilities
     "python-dotenv==1.0.1",
     "python-multipart==0.0.12",
@@ -33,3 +39,6 @@ dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

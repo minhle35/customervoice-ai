@@ -1,0 +1,2061 @@
+{
+"search_metadata":
+{
+"id":
+"69b9d89fd1a72bddb32cdf43",
+"status":
+"Success",
+"json_endpoint":
+"https://serpapi.com/searches/aIwGQ0R0tLKtexN63cCCOQ/69b9d89fd1a72bddb32cdf43.json",
+"pixel_position_endpoint":
+"https://serpapi.com/searches/aIwGQ0R0tLKtexN63cCCOQ/69b9d89fd1a72bddb32cdf43.json_with_pixel_position",
+"created_at":
+"2026-03-17 22:41:35 UTC",
+"processed_at":
+"2026-03-17 22:41:35 UTC",
+"google_url":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2+&oq=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2+&uule=w+CAIQICIaQXVzdGluLFRleGFzLFVuaXRlZCBTdGF0ZXM&hl=en&gl=us&sourceid=chrome&ie=UTF-8",
+"raw_html_file":
+"https://serpapi.com/searches/aIwGQ0R0tLKtexN63cCCOQ/69b9d89fd1a72bddb32cdf43.html",
+"total_time_taken":
+3.89
+},
+"search_parameters":
+{
+"engine":
+"google",
+"q":
+"biển vĩnh hảo 2 ",
+"location_requested":
+"Austin, Texas, United States",
+"location_used":
+"Austin,Texas,United States",
+"google_domain":
+"google.com",
+"hl":
+"en",
+"gl":
+"us",
+"device":
+"desktop"
+},
+"search_information":
+{
+"query_displayed":
+"biển vĩnh hảo 2",
+"total_results":
+124,
+"time_taken_displayed":
+0.37,
+"organic_results_state":
+"Results for exact spelling"
+},
+"knowledge_graph":
+{
+"title":
+"Nhà hàng Biển Vĩnh Hảo 2",
+"type":
+"Restaurant",
+"entity_type":
+"local_nav",
+"kgmid":
+"/g/11vwr7tdgq",
+"knowledge_graph_search_link":
+"https://www.google.com/search?kgmid=/g/11vwr7tdgq&hl=en-US&q=Nh%C3%A0+h%C3%A0ng+Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+2",
+"serpapi_knowledge_graph_search_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en-US&kgmid=%2Fg%2F11vwr7tdgq&location=Austin%2C+Texas%2C+United+States&q=Nh%C3%A0+h%C3%A0ng+Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+2",
+"place_id":
+"ChIJ_z3VNAApdzERv8Wv7XwXWps",
+"reviews":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOYeIDfI9eUpVPCVPbbRqDW7QpwpvXzogT4cdl62kM6znGjPICB3-PbTruGe0GcOesltBfsqOExUr9du0N4z6MzJW7Dw6sYSWRxb_YsJnYe4-kKN_ow%3D%3D&q=Nh%C3%A0+h%C3%A0ng+Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+2+Reviews&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ0bkNegQIKhAF",
+"local_map":
+{
+"image":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/UK_mqNIirZ8yzJxvWdEzQVLahz_r_7Ark3IwoNr-RUE.webp",
+"link":
+"https://www.google.com/maps/place/Nh%C3%A0+h%C3%A0ng+Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+2/data=!4m2!3m1!1s0x0:0x9b5a177cedafc5bf?sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ_BJ6BAgsEAA&hl=en&gl=us"
+},
+"rating":
+4.2,
+"review_count":
+246,
+"price":
+"₫100,000–200,000",
+"price_details":
+{
+"distribution":
+[
+{
+"price":
+"₫1–100,000",
+"percentage":
+10.526316
+},
+{
+"price":
+"₫100,000–200,000",
+"percentage":
+51.31579
+},
+{
+"price":
+"₫200,000–300,000",
+"percentage":
+21.052631
+},
+{
+"price":
+"₫300,000–400,000",
+"percentage":
+6.5789475
+}
+],
+"total_reported":
+76
+},
+"address":
+"QL1A, Thôn Vĩnh Hưng, Tuy Phong, Bình Thuận, Vietnam",
+"address_links":
+[
+{
+"text":
+"Address",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=nh%C3%A0+h%C3%A0ng+bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2+address&ludocid=11194285649113892287&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ6BN6BAg6EAI"
+}
+],
+"phone":
+"+84 938 642 816",
+"phone_links":
+[
+{
+"text":
+"Phone",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=nh%C3%A0+h%C3%A0ng+bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2+phone&ludocid=11194285649113892287&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ6BN6BAg8EAI"
+}
+],
+"raw_hours":
+"Closed · Opens 6 - 30 AM",
+"hours":
+{
+"wednesday":
+{
+"opens":
+"6:30 AM",
+"closes":
+"8 PM"
+},
+"thursday":
+{
+"opens":
+"6:30 AM",
+"closes":
+"8 PM"
+},
+"friday":
+{
+"opens":
+"6:30 AM",
+"closes":
+"8 PM"
+},
+"saturday":
+{
+"opens":
+"6:30 AM",
+"closes":
+"8 PM"
+},
+"sunday":
+{
+"opens":
+"6:30 AM",
+"closes":
+"8 PM"
+},
+"monday":
+{
+"opens":
+"12 AM",
+"closes":
+"8 PM"
+},
+"tuesday":
+{
+"opens":
+"6:30 AM",
+"closes":
+"8 PM"
+}
+},
+"popular_times":
+{
+"live":
+{
+"time":
+"12 PM",
+"info":
+"Usually a little busy
+No wait"
+},
+"graph_results":
+{
+"monday":
+[
+{
+"time":
+"12 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+6
+},
+{
+"time":
+"1 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+6
+},
+{
+"time":
+"2 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+7
+},
+{
+"time":
+"3 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+8
+},
+{
+"time":
+"4 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+8
+},
+{
+"time":
+"5 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+8
+},
+{
+"time":
+"6 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+10
+},
+{
+"time":
+"7 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+14
+},
+{
+"time":
+"8 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+19
+},
+{
+"time":
+"9 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+23
+},
+{
+"time":
+"10 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+24
+},
+{
+"time":
+"11 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+32
+},
+{
+"time":
+"12 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+34
+},
+{
+"time":
+"1 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+38
+},
+{
+"time":
+"2 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+38
+},
+{
+"time":
+"3 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+38
+},
+{
+"time":
+"4 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+37
+},
+{
+"time":
+"5 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+26
+},
+{
+"time":
+"6 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+20
+},
+{
+"time":
+"7 PM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+14
+}
+],
+"tuesday":
+[
+{
+"time":
+"5 AM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"6 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+16
+},
+{
+"time":
+"7 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+24
+},
+{
+"time":
+"8 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+19
+},
+{
+"time":
+"9 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+15
+},
+{
+"time":
+"10 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+19
+},
+{
+"time":
+"11 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+28
+},
+{
+"time":
+"12 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+35
+},
+{
+"time":
+"1 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+32
+},
+{
+"time":
+"2 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+28
+},
+{
+"time":
+"3 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+26
+},
+{
+"time":
+"4 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+29
+},
+{
+"time":
+"5 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+30
+},
+{
+"time":
+"6 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+28
+},
+{
+"time":
+"7 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+21
+},
+{
+"time":
+"8 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"9 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"10 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+}
+],
+"wednesday":
+[
+{
+"time":
+"5 AM",
+"wait_time":
+"Usually no wait",
+"busyness_score":
+0
+},
+{
+"time":
+"6 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+11
+},
+{
+"time":
+"7 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+11
+},
+{
+"time":
+"8 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+16
+},
+{
+"time":
+"9 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+21
+},
+{
+"time":
+"10 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+32
+},
+{
+"time":
+"11 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+50
+},
+{
+"time":
+"12 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+66
+},
+{
+"time":
+"1 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+66
+},
+{
+"time":
+"2 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+53
+},
+{
+"time":
+"3 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+41
+},
+{
+"time":
+"4 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+34
+},
+{
+"time":
+"5 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+29
+},
+{
+"time":
+"6 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+23
+},
+{
+"time":
+"7 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+24
+},
+{
+"time":
+"8 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"9 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"10 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+}
+],
+"thursday":
+[
+{
+"time":
+"5 AM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"6 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+12
+},
+{
+"time":
+"7 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+16
+},
+{
+"time":
+"8 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+23
+},
+{
+"time":
+"9 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+34
+},
+{
+"time":
+"10 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+43
+},
+{
+"time":
+"11 AM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+60
+},
+{
+"time":
+"12 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+74
+},
+{
+"time":
+"1 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+78
+},
+{
+"time":
+"2 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+61
+},
+{
+"time":
+"3 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+42
+},
+{
+"time":
+"4 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+34
+},
+{
+"time":
+"5 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+37
+},
+{
+"time":
+"6 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+37
+},
+{
+"time":
+"7 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+29
+},
+{
+"time":
+"8 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"9 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"10 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+}
+],
+"friday":
+[
+{
+"time":
+"5 AM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"6 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+17
+},
+{
+"time":
+"7 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+20
+},
+{
+"time":
+"8 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+23
+},
+{
+"time":
+"9 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+29
+},
+{
+"time":
+"10 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+42
+},
+{
+"time":
+"11 AM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+60
+},
+{
+"time":
+"12 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+74
+},
+{
+"time":
+"1 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+69
+},
+{
+"time":
+"2 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+48
+},
+{
+"time":
+"3 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+29
+},
+{
+"time":
+"4 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+21
+},
+{
+"time":
+"5 PM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+19
+},
+{
+"time":
+"6 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+23
+},
+{
+"time":
+"7 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+30
+},
+{
+"time":
+"8 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"9 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"10 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+}
+],
+"saturday":
+[
+{
+"time":
+"5 AM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"6 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+11
+},
+{
+"time":
+"7 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+16
+},
+{
+"time":
+"8 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+21
+},
+{
+"time":
+"9 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+38
+},
+{
+"time":
+"10 AM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+60
+},
+{
+"time":
+"11 AM",
+"info":
+"Usually as busy as it gets",
+"wait_time":
+"No wait",
+"busyness_score":
+88
+},
+{
+"time":
+"12 PM",
+"info":
+"Usually as busy as it gets",
+"wait_time":
+"No wait",
+"busyness_score":
+100
+},
+{
+"time":
+"1 PM",
+"info":
+"Usually as busy as it gets",
+"wait_time":
+"No wait",
+"busyness_score":
+89
+},
+{
+"time":
+"2 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+62
+},
+{
+"time":
+"3 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+41
+},
+{
+"time":
+"4 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+24
+},
+{
+"time":
+"5 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+24
+},
+{
+"time":
+"6 PM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+19
+},
+{
+"time":
+"7 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+20
+},
+{
+"time":
+"8 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"9 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"10 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+}
+],
+"sunday":
+[
+{
+"time":
+"5 AM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"6 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+7
+},
+{
+"time":
+"7 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+8
+},
+{
+"time":
+"8 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+7
+},
+{
+"time":
+"9 AM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+14
+},
+{
+"time":
+"10 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+28
+},
+{
+"time":
+"11 AM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+50
+},
+{
+"time":
+"12 PM",
+"info":
+"Usually a little busy",
+"wait_time":
+"No wait",
+"busyness_score":
+67
+},
+{
+"time":
+"1 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"Up to 15 min wait",
+"busyness_score":
+73
+},
+{
+"time":
+"2 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"Up to 15 min wait",
+"busyness_score":
+60
+},
+{
+"time":
+"3 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"Up to 15 min wait",
+"busyness_score":
+48
+},
+{
+"time":
+"4 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+37
+},
+{
+"time":
+"5 PM",
+"info":
+"Usually not too busy",
+"wait_time":
+"No wait",
+"busyness_score":
+26
+},
+{
+"time":
+"6 PM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+17
+},
+{
+"time":
+"7 PM",
+"info":
+"Usually not busy",
+"wait_time":
+"No wait",
+"busyness_score":
+14
+},
+{
+"time":
+"8 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"9 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+},
+{
+"time":
+"10 PM",
+"wait_time":
+"No wait",
+"busyness_score":
+0
+}
+]
+}
+},
+"merchant_description":
+""Nhà hàng cơm niêu Biển Vĩnh Hảo 2 toạ lạc trên cung đường quốc lộ 1A, tại vị trí Eo Biển vô cùng độc đáo. Nơi tiếp giáp giữa 3 tuyến giao thông Đường bộ - đường Sắt- đường thuỷ.. Ngoài cảnh đẹp được thiên nhiên ban tặng, nhà hàng phục vụ du khách Hải sản tươi sống các loại cùng với Cơm niêu và các món ăn đặc trưng của người dân xứ Biển: cá kho, canh chua, tôm, mực, bào ngư,.."",
+"unclaimed_listing":
+true
+},
+"inline_images":
+[
+{
+"source":
+"https://www.facebook.com/p/Nh%C3%A0-h%C3%A0ng-BI%E1%BB%82N-V%C4%A8NH-H%E1%BA%A2O-100057496447129/",
+"thumbnail":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/ZlODyfzQXJyL2JRAgILdygKZ20UKnF8gVa8YxNKsu7g.jpeg",
+"original":
+"https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=100057496447129",
+"title":
+"Nhà hàng BIỂN VĨNH HẢO | Phan Thiet",
+"source_name":
+"Facebook"
+},
+{
+"source":
+"https://www.facebook.com/p/Nh%C3%A0-h%C3%A0ng-BI%E1%BB%82N-V%C4%A8NH-H%E1%BA%A2O-100057496447129/",
+"thumbnail":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/OmRbYyyKTQ0aHVCYiCeJOqcsRKoeVZHjKBV-6WT71Og.jpeg",
+"original":
+"https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=147884183804796",
+"title":
+"Nhà hàng BIỂN VĨNH HẢO | Phan Thiet",
+"source_name":
+"Facebook"
+},
+{
+"source":
+"https://www.facebook.com/p/Nh%C3%A0-h%C3%A0ng-BI%E1%BB%82N-V%C4%A8NH-H%E1%BA%A2O-100057496447129/",
+"thumbnail":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/YtfVa0vFcCjlFTu3jYvCgGEDYHj4lHREFVdeVQInmuM.jpeg",
+"original":
+"https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=458977858011930",
+"title":
+"Nhà hàng BIỂN VĨNH HẢO | Phan Thiet",
+"source_name":
+"Facebook"
+}
+],
+"inline_videos":
+[
+{
+"position":
+1,
+"title":
+"Biển Vĩnh Hảo, trải nghiệm tuổi trẻ của Thức và Hiệp | Hành ...",
+"link":
+"https://www.youtube.com/watch?v=7Q8gXCLWfUA",
+"thumbnail":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/zaDE1Qb0DsNcBf6un5Dgl8ps43mcuX0fbTGl3OT8nkM.jpeg",
+"channel":
+"Bùi Đình Thức",
+"platform":
+"YouTube"
+},
+{
+"position":
+2,
+"title":
+"Nhà hàng Biển Vĩnh Hảo 2, Cà Ná, Ninh Thuận #trendtiktok ...",
+"link":
+"https://www.tiktok.com/@nghiennhatrang/video/7255894164007619845",
+"thumbnail":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Ozhn7-KbRJoZjgb9DIJetECbf1P2IAVbrV32CYwRbCw.jpeg",
+"channel":
+"nghiennhatrang",
+"platform":
+"TikTok"
+},
+{
+"position":
+3,
+"title":
+"[Eo biển Vĩnh Hảo - Huyện Tuy Phong - Tỉnh Bình Thuận ...",
+"link":
+"https://www.facebook.com/hoangwanderlust/videos/eo-bi%E1%BB%83n-v%C4%A9nh-h%E1%BA%A3o-huy%E1%BB%87n-tuy-phong-t%E1%BB%89nh-b%C3%ACnh-thu%E1%BA%ADn-nh%E1%BA%AFc-%C4%91%E1%BA%BFn-t%E1%BB%89nh-b%C3%ACnh-thu%E1%BA%ADn-m%C3%ACnh-n/834213882007889/",
+"thumbnail":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/AUdVa_1ieuP5w3rMwFYy_Ena9WHeqae-qV3CLD8Yujg.png",
+"channel":
+"Bùi Hoàng",
+"platform":
+"Facebook"
+}
+],
+"ai_overview":
+{
+"page_token":
+"KWpMyHicxZbLcuo4EIb38x54kwM2YAJOleuUJF8wCQRzIIGzoXxDNr6I2IADu3mXeap5mpFtIIZAprKYGlEl0VKruy1_-uHPvwIv8v_-Q3XX61XywLJpmtYwIThwahYJWSPZRRa7IEESW-7PzSZwxPQOAU3XkGbo05e9rQabJ2UUOKqyf1JeNsZ0FPxGcGyrCvd72mfcQHQiBgfiJmF2W7HJWInIMY4nkrXXMsxXRU2ex6npDzf3S4EDhMkzinPTSJwlLeh9mbBzlnZ-pSlRo5bUnKhmvy4bjhrZts3VGlxdqD2zRkgdwH_UdODRHulAzix8vojyKfTFdkTX6SaoHSeKCPDMCRYxEAI6zNf0K5E0gPMSYI_GkjqN-X22D1wJd2y9spEU5bj9bCBZBvlKsZ_bsRSU5_q85-pGWBScNeuj_puN5pBOWWiKYVpK3C0GfLB58ITy8MWzY8hLXbB35cnt8IgA1Acdf4hulH_MrYXp4xrPaPmsjSlTHGvGdKiznuVa-Zc4yVBDY4EjymozoddFua9uX9uNWOkvqwN9mjzjuaazlkn9AmLYjj1359yPHGorOVGdlKnu2PKKm2yqpEdqTzVYLyGdHRo-P12dTl7j43r74omLEyNAHmXjEaVh_uXt5NXFoK-hckJcvJtLpD9ZOdLewSCHiQtUsJy7f_AL04sqT_6Uf6CA0z2Xwewi7UeNCFFEMNDUwpydudHqdQjze-tmx3OeEX4AX3Rudi1PJea9hU-x6Bno9FpK6cgDanYmEGSfYq9M8gFrl08tlew-QDw6IP39Rv7VAx8ZvkCyjLKqdIWBJexhiyBzO5j4YdtIk1norpX0gC4JzW8osvX_wX3Q60m-SPBnuPGXcHtUaL7Q64OFj3AXek30K3BrB7jLen1E7RjuHO5eGe6bel2CO9v-NdzKdbjRNbi1c7i123Bnen2CWwboQq_zkLlel-H-vl5vv6PXOeNOMZyL92aJb4p4Fwj8e0_udR9jXlCtVr_espdoGO0NenE-ifgiXD8YdvBj7tkPsNFb72zmTTS9ilyvQFjpNKO7bQXxFSBE7p2bz4IKaJK7BhMGMRE5o93bvHd8GS5WcahK8s6fxjJMu04SJ9x2NPEXRut9b5jmoEFamqQqdTiQ3t6VXusFzGbVbme39_y6R6qR2o-mQ8kyuNHjttq3Zi_cuO63h89h13Mnbstu8nJ7spV8ff70-ub3Foh3F6OdFTz393Pll-2ubGM3y6tKxOb4fhzslimMfCaMLZG-Ph6DgQ5ecfbrzSSWMXcS-gduIZhCpyPwgtls2vUOE-L1biXyTSaJYrH-D-1v8QU",
+"serpapi_link":
+"https://serpapi.com/search.json?engine=google_ai_overview&page_token=KWpMyHicxZbLcuo4EIb38x54kwM2YAJOleuUJF8wCQRzIIGzoXxDNr6I2IADu3mXeap5mpFtIIZAprKYGlEl0VKruy1_-uHPvwIv8v_-Q3XX61XywLJpmtYwIThwahYJWSPZRRa7IEESW-7PzSZwxPQOAU3XkGbo05e9rQabJ2UUOKqyf1JeNsZ0FPxGcGyrCvd72mfcQHQiBgfiJmF2W7HJWInIMY4nkrXXMsxXRU2ex6npDzf3S4EDhMkzinPTSJwlLeh9mbBzlnZ-pSlRo5bUnKhmvy4bjhrZts3VGlxdqD2zRkgdwH_UdODRHulAzix8vojyKfTFdkTX6SaoHSeKCPDMCRYxEAI6zNf0K5E0gPMSYI_GkjqN-X22D1wJd2y9spEU5bj9bCBZBvlKsZ_bsRSU5_q85-pGWBScNeuj_puN5pBOWWiKYVpK3C0GfLB58ITy8MWzY8hLXbB35cnt8IgA1Acdf4hulH_MrYXp4xrPaPmsjSlTHGvGdKiznuVa-Zc4yVBDY4EjymozoddFua9uX9uNWOkvqwN9mjzjuaazlkn9AmLYjj1359yPHGorOVGdlKnu2PKKm2yqpEdqTzVYLyGdHRo-P12dTl7j43r74omLEyNAHmXjEaVh_uXt5NXFoK-hckJcvJtLpD9ZOdLewSCHiQtUsJy7f_AL04sqT_6Uf6CA0z2Xwewi7UeNCFFEMNDUwpydudHqdQjze-tmx3OeEX4AX3Rudi1PJea9hU-x6Bno9FpK6cgDanYmEGSfYq9M8gFrl08tlew-QDw6IP39Rv7VAx8ZvkCyjLKqdIWBJexhiyBzO5j4YdtIk1norpX0gC4JzW8osvX_wX3Q60m-SPBnuPGXcHtUaL7Q64OFj3AXek30K3BrB7jLen1E7RjuHO5eGe6bel2CO9v-NdzKdbjRNbi1c7i123Bnen2CWwboQq_zkLlel-H-vl5vv6PXOeNOMZyL92aJb4p4Fwj8e0_udR9jXlCtVr_espdoGO0NenE-ifgiXD8YdvBj7tkPsNFb72zmTTS9ilyvQFjpNKO7bQXxFSBE7p2bz4IKaJK7BhMGMRE5o93bvHd8GS5WcahK8s6fxjJMu04SJ9x2NPEXRut9b5jmoEFamqQqdTiQ3t6VXusFzGbVbme39_y6R6qR2o-mQ8kyuNHjttq3Zi_cuO63h89h13Mnbstu8nJ7spV8ff70-ub3Foh3F6OdFTz393Pll-2ubGM3y6tKxOb4fhzslimMfCaMLZG-Ph6DgQ5ecfbrzSSWMXcS-gduIZhCpyPwgtls2vUOE-L1biXyTSaJYrH-D-1v8QU"
+},
+"organic_results":
+[
+{
+"position":
+1,
+"title":
+"NHÀ HÀNG BIỂN VĨNH HẢO",
+"link":
+"http://bienvinhhao.com/home.html",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=http://bienvinhhao.com/home.html&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECA8QAQ",
+"displayed_link":
+"http://bienvinhhao.com",
+"favicon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fqFUp6O3RA5otMokV8u7qWw.png",
+"snippet":
+"Điện thoại: 0252.222.8882 Mobile: 0909.322.036 ( Ms.HÃ ) Email: bienvinhhao.restaurant@gmail.com Zalo: 0394492879 Nhà hàng phục vụ Cơm Niêu, ...",
+"about_this_result":
+{
+"source":
+{
+"description":
+"Điện thoại: 0252.222.8882 Mobile: 0909.322.036 ( Ms.HÃ ) Email: bienvinhhao.restaurant@gmail.com Zalo: 0394492879 Nhà hàng phục vụ Cơm Niêu, ...",
+"source_info_link":
+"http://bienvinhhao.com/home.html",
+"icon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47flTji4HtExd3VsaLZymjSFcufLnPeIZRGr2TS9vf8_gu.png"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+http://bienvinhhao.com/home.html&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+http%3A%2F%2Fbienvinhhao.com%2Fhome.html",
+"source":
+"NHÀ HÀNG BIỂN VĨNH HẢO"
+},
+{
+"position":
+2,
+"title":
+"Nhà hàng BIỂN VĨNH HẢO | Phan Thiet",
+"link":
+"https://www.facebook.com/p/Nh%C3%A0-h%C3%A0ng-BI%E1%BB%82N-V%C4%A8NH-H%E1%BA%A2O-100057496447129/",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.facebook.com/p/Nh%25C3%25A0-h%25C3%25A0ng-BI%25E1%25BB%2582N-V%25C4%25A8NH-H%25E1%25BA%25A2O-100057496447129/&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECBAQAQ",
+"displayed_link":
+"1.4K+ followers",
+"favicon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fhX1CNj-UUNTedbMuT_3Z2E.png",
+"snippet":
+"Nhà hàng BIỂN VĨNH HẢO ; Details. 󰡍. 3 Reviews. 󰛏. Open now. 󰘛. Quốc lộ 1A, Xã Vĩnh Tân, huyện Tuy Phong, Phan Thiet, Vietnam ; Links. 󰤂. bienvinhhao.com ; Contact ...",
+"snippet_highlighted_words":
+[
+"Quốc lộ 1A, Xã Vĩnh Tân, huyện Tuy Phong, Phan Thiet, Vietnam"
+],
+"rich_snippet":
+{
+"top":
+{
+"detected_extensions":
+{
+"rating":
+4.2,
+"reviews":
+5
+},
+"extensions":
+[
+"4.2(5)"
+]
+}
+},
+"about_this_result":
+{
+"source":
+{
+"description":
+"Nhà hàng BIỂN VĨNH HẢO ; Details. 󰡍. 3 Reviews. 󰛏. Open now. 󰘛. Quốc lộ 1A, Xã Vĩnh Tân, huyện Tuy Phong, Phan Thiet, Vietnam ; Links. 󰤂. bienvinhhao.com ; Contact ...",
+"source_info_link":
+"https://www.facebook.com/p/Nh%C3%A0-h%C3%A0ng-BI%E1%BB%82N-V%C4%A8NH-H%E1%BA%A2O-100057496447129/",
+"icon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fhp_mBUQJUP63F7ly8BojXf106aph2DMnFW18yFhMCGv.png"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+https://www.facebook.com/p/Nh%C3%A0-h%C3%A0ng-BI%E1%BB%82N-V%C4%A8NH-H%E1%BA%A2O-100057496447129/&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+https%3A%2F%2Fwww.facebook.com%2Fp%2FNh%25C3%25A0-h%25C3%25A0ng-BI%25E1%25BB%2582N-V%25C4%25A8NH-H%25E1%25BA%25A2O-100057496447129%2F",
+"source":
+"Facebook · Nhà hàng BIỂN VĨNH HẢO"
+},
+{
+"position":
+3,
+"title":
+"Nhà hàng BIỂN VĨNH HẢO 2 in Phuoc Diem - Ask AI",
+"link":
+"https://mindtrip.ai/restaurant/phuoc-diem-ninh-thuan/nha-hang-bien-vinh-hao-2/re-0CTCDc1w",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://mindtrip.ai/restaurant/phuoc-diem-ninh-thuan/nha-hang-bien-vinh-hao-2/re-0CTCDc1w&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECFMQAQ",
+"displayed_link":
+"https://mindtrip.ai › restaurant › nh...",
+"favicon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fsaNoRO7YMk7KGUGYGI2NaE.png",
+"snippet":
+"Features traditional Vietnamese coastal dishes including grilled fish, seafood hotpot, and regional specialties. Located along Highway 1 in Binh Thuan province, ...",
+"about_this_result":
+{
+"source":
+{
+"description":
+"Features traditional Vietnamese coastal dishes including grilled fish, seafood hotpot, and regional specialties. Located along Highway 1 in Binh Thuan province, ...",
+"source_info_link":
+"https://mindtrip.ai/restaurant/phuoc-diem-ninh-thuan/nha-hang-bien-vinh-hao-2/re-0CTCDc1w",
+"icon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fnVWMp_nMg7_EMPcOXZtnWPGwOB7hX07leG9gc-sA9BU.png"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+https://mindtrip.ai/restaurant/phuoc-diem-ninh-thuan/nha-hang-bien-vinh-hao-2/re-0CTCDc1w&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+https%3A%2F%2Fmindtrip.ai%2Frestaurant%2Fphuoc-diem-ninh-thuan%2Fnha-hang-bien-vinh-hao-2%2Fre-0CTCDc1w",
+"source":
+"Mindtrip"
+},
+{
+"position":
+4,
+"title":
+"NHÀ HÀNG BIỂN VĨNH HẢO",
+"link":
+"https://www.nhahangcana.com/",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.nhahangcana.com/&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECE8QAQ",
+"displayed_link":
+"https://www.nhahangcana.com",
+"favicon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fqIR4197JBZni56_moUzhk8.jpeg",
+"snippet":
+"Tọa lạc tại Khu Du Lịch Cà Ná, nằm ngay trên tuyến Quốc Lộ Sài Gòn đi Phan Rang - Nha Trang vì vậy đây là điểm dừng chân tuyệt vời cho du khách sau những ngày ...",
+"snippet_highlighted_words":
+[
+"Tọa lạc tại Khu Du Lịch Cà N"
+],
+"about_this_result":
+{
+"source":
+{
+"description":
+"Tọa lạc tại Khu Du Lịch Cà Ná, nằm ngay trên tuyến Quốc Lộ Sài Gòn đi Phan Rang - Nha Trang vì vậy đây là điểm dừng chân tuyệt vời cho du khách sau những ngày ...",
+"source_info_link":
+"https://www.nhahangcana.com/",
+"icon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fsSAi4KwvtFxgZwIxzCks7DE38Be1ujDYhVftm6YXlhJ.jpeg"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+https://www.nhahangcana.com/&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+https%3A%2F%2Fwww.nhahangcana.com%2F",
+"source":
+"nhahangcana.com"
+},
+{
+"position":
+5,
+"title":
+"nhà hàng Biển Vĩnh Hảo 2",
+"link":
+"https://thanhnien.vn/nha-hang-bien-vinh-hao-2-tags894420.html",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://thanhnien.vn/nha-hang-bien-vinh-hao-2-tags894420.html&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECFEQAQ",
+"displayed_link":
+"https://thanhnien.vn › nha-hang-bi...",
+"favicon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fv6wflFX0v6j2ur9zsnHhcw.png",
+"snippet":
+"Lúc 16 giờ 30 ngày 27.2, Chi cục Quản lý đường bộ 4.1 đã buộc chủ nhà hàng Biển Vĩnh Hảo hoàn trả hộ lan (lan can bảo vệ hành lang) và tháo dỡ bỏ biển hiệu ...",
+"snippet_highlighted_words":
+[
+"Biển Vĩnh Hảo",
+"biển"
+],
+"about_this_result":
+{
+"source":
+{
+"description":
+"Lúc 16 giờ 30 ngày 27.2, Chi cục Quản lý đường bộ 4.1 đã buộc chủ nhà hàng Biển Vĩnh Hảo hoàn trả hộ lan (lan can bảo vệ hành lang) và tháo dỡ bỏ biển hiệu ...",
+"source_info_link":
+"https://thanhnien.vn/nha-hang-bien-vinh-hao-2-tags894420.html",
+"icon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47ftDXX4-m5nmv4ew5gmwB-Aa9R03txDESXCWlfs7c_AB8.png"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+https://thanhnien.vn/nha-hang-bien-vinh-hao-2-tags894420.html&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+https%3A%2F%2Fthanhnien.vn%2Fnha-hang-bien-vinh-hao-2-tags894420.html",
+"source":
+"Báo Thanh Niên"
+},
+{
+"position":
+6,
+"title":
+"Mời quý khách ghé nhà hàng cơm niêu biển vĩnh hảo 2 để ...",
+"link":
+"https://www.facebook.com/61550915321529/posts/m%E1%BB%9Di-qu%C3%BD-kh%C3%A1ch-gh%C3%A9-nh%C3%A0-h%C3%A0ng-c%C6%A1m-ni%C3%AAu-bi%E1%BB%83n-v%C4%A9nh-h%E1%BA%A3o-2-%C4%91%E1%BB%83-tr%E1%BA%A3i-nghi%E1%BB%87m-m%C3%B3n-%C4%83n-%C4%91a-d%E1%BA%A1n/122248389476030510/",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.facebook.com/61550915321529/posts/m%25E1%25BB%259Di-qu%25C3%25BD-kh%25C3%25A1ch-gh%25C3%25A9-nh%25C3%25A0-h%25C3%25A0ng-c%25C6%25A1m-ni%25C3%25AAu-bi%25E1%25BB%2583n-v%25C4%25A9nh-h%25E1%25BA%25A3o-2-%25C4%2591%25E1%25BB%2583-tr%25E1%25BA%25A3i-nghi%25E1%25BB%2587m-m%25C3%25B3n-%25C4%2583n-%25C4%2591a-d%25E1%25BA%25A1n/122248389476030510/&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECFQQAQ",
+"displayed_link":
+"4 reactions · 1 year ago",
+"favicon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47flPB1fFTdOK6zG16tdOO5OI.png",
+"snippet":
+"Bữa trưa tại Cơm Niêu Biển Vĩnh Hảo 2 Fanpage : Hòn Cau Resort - Bình Thuận & Cơm Niêu Cà Ná https://honcauresort.com.vn ☎️ 0252 2234 ...",
+"snippet_highlighted_words":
+[
+"Biển Vĩnh Hảo 2"
+],
+"about_this_result":
+{
+"source":
+{
+"description":
+"Bữa trưa tại Cơm Niêu Biển Vĩnh Hảo 2 Fanpage : Hòn Cau Resort - Bình Thuận & Cơm Niêu Cà Ná https://honcauresort.com.vn ☎️ 0252 2234 ...",
+"source_info_link":
+"https://www.facebook.com/61550915321529/posts/m%E1%BB%9Di-qu%C3%BD-kh%C3%A1ch-gh%C3%A9-nh%C3%A0-h%C3%A0ng-c%C6%A1m-ni%C3%AAu-bi%E1%BB%83n-v%C4%A9nh-h%E1%BA%A3o-2-%C4%91%E1%BB%83-tr%E1%BA%A3i-nghi%E1%BB%87m-m%C3%B3n-%C4%83n-%C4%91a-d%E1%BA%A1n/122248389476030510/",
+"icon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fr_Ym87929cotYLF0Lr19BAs99xSvL8fqxipjVOl0C21.png"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+https://www.facebook.com/61550915321529/posts/m%E1%BB%9Di-qu%C3%BD-kh%C3%A1ch-gh%C3%A9-nh%C3%A0-h%C3%A0ng-c%C6%A1m-ni%C3%AAu-bi%E1%BB%83n-v%C4%A9nh-h%E1%BA%A3o-2-%C4%91%E1%BB%83-tr%E1%BA%A3i-nghi%E1%BB%87m-m%C3%B3n-%C4%83n-%C4%91a-d%E1%BA%A1n/122248389476030510/&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+https%3A%2F%2Fwww.facebook.com%2F61550915321529%2Fposts%2Fm%25E1%25BB%259Di-qu%25C3%25BD-kh%25C3%25A1ch-gh%25C3%25A9-nh%25C3%25A0-h%25C3%25A0ng-c%25C6%25A1m-ni%25C3%25AAu-bi%25E1%25BB%2583n-v%25C4%25A9nh-h%25E1%25BA%25A3o-2-%25C4%2591%25E1%25BB%2583-tr%25E1%25BA%25A3i-nghi%25E1%25BB%2587m-m%25C3%25B3n-%25C4%2583n-%25C4%2591a-d%25E1%25BA%25A1n%2F122248389476030510%2F",
+"source":
+"Facebook · Cơm Niêu Cà Ná"
+},
+{
+"position":
+7,
+"title":
+"Nhà hàng Biển Vĩnh Hảo 2 in Bình Thuận Province, Vietnam",
+"link":
+"https://wanderboat.ai/restaurants/vietnam/binh-thuan-province/nha-hang-bien-vinh-hao-2/jYCyA71DQZGn2CHLMZTbUQ",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://wanderboat.ai/restaurants/vietnam/binh-thuan-province/nha-hang-bien-vinh-hao-2/jYCyA71DQZGn2CHLMZTbUQ&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECFAQAQ",
+"displayed_link":
+"https://wanderboat.ai › vietnam",
+"favicon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fjpbXmineLUNkEfTDPMfbjg.png",
+"snippet":
+"Quán nằm ngay quốc lộ 1A rất dễ tìm, ngay sát bờ biển nên thoáng đãng và có cảnh biển đẹp. Không gian quán rộng rãi, gần như không bao giờ đông nên mọi ...",
+"snippet_highlighted_words":
+[
+"án nằm ngay quốc lộ 1A"
+],
+"about_this_result":
+{
+"source":
+{
+"description":
+"Quán nằm ngay quốc lộ 1A rất dễ tìm, ngay sát bờ biển nên thoáng đãng và có cảnh biển đẹp. Không gian quán rộng rãi, gần như không bao giờ đông nên mọi ...",
+"source_info_link":
+"https://wanderboat.ai/restaurants/vietnam/binh-thuan-province/nha-hang-bien-vinh-hao-2/jYCyA71DQZGn2CHLMZTbUQ",
+"icon":
+"https://serpapi.com/searches/69b9d89fd1a72bddb32cdf43/images/Rkq1-JiYCWWRbaQjBo47fjGt4XD0kMGxBbTB2xv16VMyCZtJFI3VkyKyf-BJRLu9.png"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+https://wanderboat.ai/restaurants/vietnam/binh-thuan-province/nha-hang-bien-vinh-hao-2/jYCyA71DQZGn2CHLMZTbUQ&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+https%3A%2F%2Fwanderboat.ai%2Frestaurants%2Fvietnam%2Fbinh-thuan-province%2Fnha-hang-bien-vinh-hao-2%2FjYCyA71DQZGn2CHLMZTbUQ",
+"source":
+"Wanderboat AI"
+},
+{
+"position":
+8,
+"title":
+"Thảo Luận Chung Câu chuyện về nhà hàng Biển Vĩnh Hảo",
+"link":
+"https://www.otosaigon.com/threads/cau-chuyen-ve-nha-hang-bien-vinh-hao.8976741/page-4",
+"redirect_link":
+"https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.otosaigon.com/threads/cau-chuyen-ve-nha-hang-bien-vinh-hao.8976741/page-4&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQFnoECFIQAQ",
+"displayed_link":
+"https://www.otosaigon.com › page-4",
+"date":
+"Jun 22, 2020",
+"snippet":
+"Quán có bãi xe rộng rãi, xuất phát 4:00 - 5:00 từ Sài Gòn ra miền Trung thì ăn trưa ở đây hợp lí. Thức ăn tươi ngon, nấu liền và phục vụ ...",
+"about_this_result":
+{
+"source":
+{
+"description":
+"Quán có bãi xe rộng rãi, xuất phát 4:00 - 5:00 từ Sài Gòn ra miền Trung thì ăn trưa ở đây hợp lí. Thức ăn tươi ngon, nấu liền và phục vụ ...",
+"source_info_link":
+"https://www.otosaigon.com/threads/cau-chuyen-ve-nha-hang-bien-vinh-hao.8976741/page-4"
+},
+"languages":
+[
+"en"
+],
+"regions":
+[
+"US"
+]
+},
+"about_page_link":
+"https://www.google.com/search?q=About+https://www.otosaigon.com/threads/cau-chuyen-ve-nha-hang-bien-vinh-hao.8976741/page-4&tbm=ilp",
+"about_page_serpapi_link":
+"https://serpapi.com/search.json?engine=google_about_this_result&google_domain=google.com&q=About+https%3A%2F%2Fwww.otosaigon.com%2Fthreads%2Fcau-chuyen-ve-nha-hang-bien-vinh-hao.8976741%2Fpage-4",
+"source":
+"Otosaigon"
+}
+],
+"menu_highlights":
+[ ],
+"related_searches":
+[
+{
+"block_position":
+1,
+"query":
+"Biển Vĩnh Hảo ở đầu",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+%E1%BB%9F+%C4%91%E1%BA%A7u&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhMEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+%E1%BB%9F+%C4%91%E1%BA%A7u"
+},
+{
+"block_position":
+1,
+"query":
+"Nhà hàng Biển Vĩnh Hảo 1",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=Nh%C3%A0+h%C3%A0ng+Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+1&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhLEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=Nh%C3%A0+h%C3%A0ng+Bi%E1%BB%83n+V%C4%A9nh+H%E1%BA%A3o+1"
+},
+{
+"block_position":
+1,
+"query":
+"Quán ăn Vĩnh Hảo",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=Qu%C3%A1n+%C4%83n+V%C4%A9nh+H%E1%BA%A3o&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhNEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=Qu%C3%A1n+%C4%83n+V%C4%A9nh+H%E1%BA%A3o"
+},
+{
+"block_position":
+1,
+"query":
+"Bài đánh giá về quán biển vĩnh hảo",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=B%C3%A0i+%C4%91%C3%A1nh+gi%C3%A1+v%E1%BB%81+qu%C3%A1n+bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhgEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=B%C3%A0i+%C4%91%C3%A1nh+gi%C3%A1+v%E1%BB%81+qu%C3%A1n+bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o"
+},
+{
+"block_position":
+1,
+"query":
+"Nhà hàng Cà Ná Vĩnh Hảo",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=Nh%C3%A0+h%C3%A0ng+C%C3%A0+N%C3%A1+V%C4%A9nh+H%E1%BA%A3o&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhXEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=Nh%C3%A0+h%C3%A0ng+C%C3%A0+N%C3%A1+V%C4%A9nh+H%E1%BA%A3o"
+},
+{
+"block_position":
+1,
+"query":
+"Thực đơn của nhà hàng Cà Ná Quán",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=Th%E1%BB%B1c+%C4%91%C6%A1n+c%E1%BB%A7a+nh%C3%A0+h%C3%A0ng+C%C3%A0+N%C3%A1+Qu%C3%A1n&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhWEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=Th%E1%BB%B1c+%C4%91%C6%A1n+c%E1%BB%A7a+nh%C3%A0+h%C3%A0ng+C%C3%A0+N%C3%A1+Qu%C3%A1n"
+},
+{
+"block_position":
+1,
+"query":
+"Quan an o ca na",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=Quan+an+o+ca+na&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhVEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=Quan+an+o+ca+na"
+},
+{
+"block_position":
+1,
+"query":
+"Quán ăn ngon ở Cà Ná",
+"link":
+"https://www.google.com/search?sca_esv=3f9b988949b33d18&hl=en&gl=us&q=Qu%C3%A1n+%C4%83n+ngon+%E1%BB%9F+C%C3%A0+N%C3%A1&sa=X&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ1QJ6BAhOEAE",
+"serpapi_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=Qu%C3%A1n+%C4%83n+ngon+%E1%BB%9F+C%C3%A0+N%C3%A1"
+}
+],
+"pagination":
+{
+"current":
+1,
+"next":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&sca_esv=3f9b988949b33d18&hl=en&gl=us&ei=oti5abWFGsOTwbkPu6j90Ao&start=10&sa=N&sstk=Af77f_f8Rh0izFOv9OZH4snXf72r4ndBjyPpkCIsEi27NPgX1qvwSYx9VeRifL3dLKqdP_E9NWuUpfqRXToGC0R4aar7RmO2AKxjrA&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ8NMDegQIDhAQ",
+"other_pages":
+{
+"2":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&sca_esv=3f9b988949b33d18&hl=en&gl=us&ei=oti5abWFGsOTwbkPu6j90Ao&start=10&sa=N&sstk=Af77f_f8Rh0izFOv9OZH4snXf72r4ndBjyPpkCIsEi27NPgX1qvwSYx9VeRifL3dLKqdP_E9NWuUpfqRXToGC0R4aar7RmO2AKxjrA&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ8tMDegQIDhAE",
+"3":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&sca_esv=3f9b988949b33d18&hl=en&gl=us&ei=oti5abWFGsOTwbkPu6j90Ao&start=20&sa=N&sstk=Af77f_f8Rh0izFOv9OZH4snXf72r4ndBjyPpkCIsEi27NPgX1qvwSYx9VeRifL3dLKqdP_E9NWuUpfqRXToGC0R4aar7RmO2AKxjrA&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ8tMDegQIDhAG",
+"4":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&sca_esv=3f9b988949b33d18&hl=en&gl=us&ei=oti5abWFGsOTwbkPu6j90Ao&start=30&sa=N&sstk=Af77f_f8Rh0izFOv9OZH4snXf72r4ndBjyPpkCIsEi27NPgX1qvwSYx9VeRifL3dLKqdP_E9NWuUpfqRXToGC0R4aar7RmO2AKxjrA&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ8tMDegQIDhAI",
+"5":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&sca_esv=3f9b988949b33d18&hl=en&gl=us&ei=oti5abWFGsOTwbkPu6j90Ao&start=40&sa=N&sstk=Af77f_f8Rh0izFOv9OZH4snXf72r4ndBjyPpkCIsEi27NPgX1qvwSYx9VeRifL3dLKqdP_E9NWuUpfqRXToGC0R4aar7RmO2AKxjrA&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ8tMDegQIDhAK",
+"6":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&sca_esv=3f9b988949b33d18&hl=en&gl=us&ei=oti5abWFGsOTwbkPu6j90Ao&start=50&sa=N&sstk=Af77f_f8Rh0izFOv9OZH4snXf72r4ndBjyPpkCIsEi27NPgX1qvwSYx9VeRifL3dLKqdP_E9NWuUpfqRXToGC0R4aar7RmO2AKxjrA&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ8tMDegQIDhAM",
+"7":
+"https://www.google.com/search?q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&sca_esv=3f9b988949b33d18&hl=en&gl=us&ei=oti5abWFGsOTwbkPu6j90Ao&start=60&sa=N&sstk=Af77f_f8Rh0izFOv9OZH4snXf72r4ndBjyPpkCIsEi27NPgX1qvwSYx9VeRifL3dLKqdP_E9NWuUpfqRXToGC0R4aar7RmO2AKxjrA&ved=2ahUKEwi13tHOgKiTAxXDSTABHTtUH6oQ8tMDegQIDhAO"
+}
+},
+"serpapi_pagination":
+{
+"current":
+1,
+"next_link":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=10",
+"next":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=10",
+"other_pages":
+{
+"2":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=10",
+"3":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=20",
+"4":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=30",
+"5":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=40",
+"6":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=50",
+"7":
+"https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&location=Austin%2C+Texas%2C+United+States&q=bi%E1%BB%83n+v%C4%A9nh+h%E1%BA%A3o+2&start=60"
+}
+}
+}
