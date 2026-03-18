@@ -21,10 +21,14 @@ class Settings(BaseSettings):
     celery_broker_url: str
     celery_result_backend: str
 
-    # OpenAI
-    openai_api_key: str
-    openai_embedding_model: str = "text-embedding-3-small"
-    openai_chat_model: str = "gpt-4o-mini"
+    # OpenRouter (chat/LLM — OpenAI-compatible)
+    openrouter_api_key: str = ""
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_chat_model: str = "meta-llama/llama-3.3-70b-instruct:free"
+
+    # Embeddings — sentence-transformers (local, no API cost)
+    embedding_model: str = "intfloat/multilingual-e5-base"
+    embedding_dimensions: int = 768
 
     # External APIs
     google_reviews_api_key: str = ""

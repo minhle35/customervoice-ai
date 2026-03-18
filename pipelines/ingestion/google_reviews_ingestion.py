@@ -50,7 +50,13 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
 
     reviews = []
     for item in payload.get("reviews", []):
-        author = item.get("user") or item.get("author") or item.get("user_name")
+        user = item.get("user") or item.get("author") or item.get("user_name")
+        # SerpAPI returns user as a dict {"name": ..., "reviews": ..., "photos": ...}
+        if isinstance(user, dict):
+            author = user.get("name")
+        else:
+            author = str(user) if user else None
+
         content = item.get("snippet") or item.get("content") or item.get("text") or ""
         rating = item.get("rating")
         published_at = _parse_datetime(item.get("timestamp") or item.get("time") or item.get("published_at"))
@@ -67,7 +73,7 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
                 platform_id=str(platform_id),
                 business_id=business_id,
                 business_name=params.get("place_name"),
-                author=str(author) if author else None,
+                author=author[:255] if author else None,
                 rating=float(rating) if rating is not None else None,
                 content=content,
                 published_at=published_at,
