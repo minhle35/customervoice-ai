@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 
 from openai import RateLimitError
 
@@ -75,6 +76,7 @@ def ingest(platform: str | Platform, business_id: str, params: dict) -> dict:
             try:
                 if _process_review(review_service, embedding_service, stored):
                     processed += 1
+                    time.sleep(3)  # ~20 RPM free tier — stay well under the limit
                 else:
                     skipped += 1
             except RateLimitError:
@@ -102,6 +104,7 @@ def process_unprocessed(limit: int = 100) -> dict:
             try:
                 if _process_review(review_service, embedding_service, stored):
                     processed += 1
+                    time.sleep(3)
             except RateLimitError:
                 rate_limited += 1
                 logger.warning(
