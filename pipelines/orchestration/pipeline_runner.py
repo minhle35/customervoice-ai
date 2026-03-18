@@ -87,3 +87,28 @@ def ingest(platform: str | Platform, business_id: str, params: dict) -> dict:
                 break
 
     return {"processed": processed, "skipped": skipped, "rate_limited": rate_limited}
+
+
+def process_unprocessed(limit: int = 100) -> dict:
+    processed = 0
+    rate_limited = 0
+
+    with SessionLocal() as db:
+        review_service = ReviewService(db)
+        embedding_service = EmbeddingService(db)
+
+        unprocessed = review_service.get_unprocessed_reviews(limit=limit)
+        for stored in unprocessed:
+            try:
+                if _process_review(review_service, embedding_service, stored):
+                    processed += 1
+            except RateLimitError:
+                rate_limited += 1
+                logger.warning(
+                    "Rate limited by LLM provider — stopping early. "
+                    "%d review(s) left unprocessed; run process_unprocessed again to finish.",
+                    len(unprocessed) - processed - rate_limited,
+                )
+                break
+
+    return {"processed": processed, "rate_limited": rate_limited}
