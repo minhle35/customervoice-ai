@@ -22,3 +22,24 @@ export interface ReviewListResponse {
   total: number
   items: Review[]
 }
+
+// ---------------------------------------------------------------------------
+// Chat / RAG
+// ---------------------------------------------------------------------------
+
+export type ChatRole = 'user' | 'assistant'
+
+export interface ChatMessage {
+  role: ChatRole
+  content: string
+}
+
+export interface ChatRequest {
+  business_id: string
+  messages: ChatMessage[]
+}
+
+export interface ChatResponse {
+  answer: string
+  sources: string[] // review UUIDs
+}
