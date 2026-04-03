@@ -53,3 +53,6 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# deepeval's pytest plugin imports google.genai (not installed) and crashes at collection
+# The plugin is registered under the name "plugins" — disable it for regular test runs
+addopts = "-p no:plugins"
