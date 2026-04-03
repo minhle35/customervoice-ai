@@ -1,3 +1,5 @@
+import os
+
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +7,11 @@ from fastapi.responses import JSONResponse
 
 from app.api import routes_chat, routes_insights, routes_integrations, routes_reviews
 from app.config import settings
+
+# Propagate LangSmith settings to os.environ so LangChain picks them up automatically
+os.environ.setdefault("LANGCHAIN_TRACING_V2", settings.langchain_tracing_v2)
+os.environ.setdefault("LANGCHAIN_API_KEY", settings.langchain_api_key)
+os.environ.setdefault("LANGCHAIN_PROJECT", settings.langchain_project)
 
 
 def create_app() -> FastAPI:

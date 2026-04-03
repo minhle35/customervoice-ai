@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     embedding_model: str = "intfloat/multilingual-e5-base"
     embedding_dimensions: int = 768
 
+    # LangSmith observability (set LANGCHAIN_TRACING_V2=true to enable)
+    langchain_tracing_v2: str = "false"
+    langchain_api_key: str = ""
+    langchain_project: str = "customervoice-ai"
+
     # External APIs
     google_reviews_api_key: str = ""
     reddit_client_id: str = ""
