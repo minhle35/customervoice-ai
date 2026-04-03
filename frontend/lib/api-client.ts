@@ -1,4 +1,4 @@
-import type { Review, ReviewListResponse } from '@/types'
+import type { ChatRequest, ChatResponse, Review, ReviewListResponse } from '@/types'
 
 const BASE_URL = '/api'
 
@@ -46,5 +46,12 @@ export function triggerIngestion(
   return apiFetch<{ status: string; task_id: string }>(`/integrations/${platform}`, {
     method: 'POST',
     body: JSON.stringify(payload),
+  })
+}
+
+export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
+  return apiFetch<ChatResponse>('/chat', {
+    method: 'POST',
+    body: JSON.stringify(request),
   })
 }
