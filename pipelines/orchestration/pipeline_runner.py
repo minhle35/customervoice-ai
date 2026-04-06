@@ -51,8 +51,26 @@ def _process_review(review_service, embedding_service, stored) -> bool:
     return True
 
 
-def ingest(platform: str | Platform, business_id: str, params: dict) -> dict:
+def _emit(task, stage: str, total: int, processed: int, skipped: int, rate_limited: int) -> None:
+    """Push a PROGRESS state update to Celery's result backend if a task handle is provided."""
+    if task is None:
+        return
+    task.update_state(
+        state="PROGRESS",
+        meta={
+            "stage": stage,
+            "total": total,
+            "processed": processed,
+            "skipped": skipped,
+            "rate_limited": rate_limited,
+        },
+    )
+
+
+def ingest(platform: str | Platform, business_id: str, params: dict, task=None) -> dict:
     platform_value = Platform(platform) if isinstance(platform, str) else platform
+
+    _emit(task, "fetching", total=0, processed=0, skipped=0, rate_limited=0)
 
     if platform_value == Platform.google:
         reviews = fetch_google_reviews(business_id, params)
@@ -63,9 +81,12 @@ def ingest(platform: str | Platform, business_id: str, params: dict) -> dict:
     else:
         raise ValueError(f"Unsupported platform: {platform_value}")
 
+    total = len(reviews)
     processed = 0
     skipped = 0
     rate_limited = 0
+
+    _emit(task, "processing", total=total, processed=0, skipped=0, rate_limited=0)
 
     with SessionLocal() as db:
         review_service = ReviewService(db)
@@ -84,11 +105,14 @@ def ingest(platform: str | Platform, business_id: str, params: dict) -> dict:
                 logger.warning(
                     "Rate limited by LLM provider — stopping early. "
                     "%d review(s) left unprocessed; run process_unprocessed to finish.",
-                    len(reviews) - processed - skipped - rate_limited,
+                    total - processed - skipped - rate_limited,
                 )
+                _emit(task, "rate_limited", total=total, processed=processed, skipped=skipped, rate_limited=rate_limited)
                 break
 
-    return {"processed": processed, "skipped": skipped, "rate_limited": rate_limited}
+            _emit(task, "processing", total=total, processed=processed, skipped=skipped, rate_limited=rate_limited)
+
+    return {"processed": processed, "skipped": skipped, "rate_limited": rate_limited, "total": total}
 
 
 def process_unprocessed(limit: int = 100) -> dict:
