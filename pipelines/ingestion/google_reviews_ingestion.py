@@ -37,15 +37,26 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
     if not api_key:
         raise ValueError("GOOGLE_REVIEWS_API_KEY is not set")
 
+    # Only forward params that SerpAPI's google_maps_reviews engine accepts.
+    # Internal keys like place_id and place_name are for DB storage only.
+    SERPAPI_ALLOWED = {"data_id", "hl", "sort_by", "next_page_token", "no_cache"}
+    serpapi_params = {k: v for k, v in params.items() if k in SERPAPI_ALLOWED}
+
     query_params = {
         "engine": "google_maps_reviews",
         "api_key": api_key,
-        **params,
+        **serpapi_params,
     }
 
     with httpx.Client(timeout=30.0) as client:
         response = client.get(SERPAPI_ENDPOINT, params=query_params)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            # Re-raise without the request URL to avoid leaking the api_key query param.
+            raise RuntimeError(
+                f"SerpAPI returned {exc.response.status_code}: {exc.response.text}"
+            ) from None
         payload = response.json()
 
     reviews = []
