@@ -39,9 +39,23 @@ export function getReview(id: string): Promise<Review> {
   return apiFetch<Review>(`/reviews/${id}`)
 }
 
+export interface PlaceResult {
+  title: string
+  data_id: string
+  place_id: string | null
+  address: string | null
+  rating: number | null
+  reviews_count: number | null
+}
+
+export function searchPlaces(query: string, country: string): Promise<PlaceResult[]> {
+  const qs = new URLSearchParams({ q: query, country })
+  return apiFetch<PlaceResult[]>(`/integrations/google/search?${qs}`)
+}
+
 export function triggerIngestion(
   platform: string,
-  payload: { platform: string; business_id: string; params: Record<string, string> }
+  payload: { platform: string; business_id?: string; params: Record<string, string> }
 ): Promise<{ status: string; task_id: string }> {
   return apiFetch<{ status: string; task_id: string }>(`/integrations/${platform}`, {
     method: 'POST',
@@ -54,4 +68,15 @@ export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
     method: 'POST',
     body: JSON.stringify(request),
   })
+}
+
+export interface TaskStatus {
+  task_id: string
+  status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'RETRY' | 'REVOKED'
+  result?: { processed: number; skipped: number; rate_limited: number }
+  error?: string
+}
+
+export function getTaskStatus(taskId: string): Promise<TaskStatus> {
+  return apiFetch<TaskStatus>(`/integrations/tasks/${taskId}`)
 }
