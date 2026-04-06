@@ -9,8 +9,11 @@ import {
   SkipForward,
   AlertTriangle,
   RefreshCw,
+  Download,
+  Cpu,
+  AlertOctagon,
 } from 'lucide-react'
-import { getTaskStatus } from '@/lib/api-client'
+import { getTaskStatus, triggerReprocess } from '@/lib/api-client'
 import type { TaskStatus } from '@/lib/api-client'
 
 interface Props {
@@ -19,6 +22,8 @@ interface Props {
 }
 
 const POLL_INTERVAL_MS = 3000
+
+// ── Status badge ────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: TaskStatus['status'] }) {
   switch (status) {
@@ -34,6 +39,7 @@ function StatusBadge({ status }: { status: TaskStatus['status'] }) {
           <XCircle className="w-3.5 h-3.5" /> Failed
         </span>
       )
+    case 'PROGRESS':
     case 'STARTED':
       return (
         <span className="flex items-center gap-1.5 text-xs font-medium text-indigo-400 bg-indigo-400/10 px-2.5 py-1 rounded-full">
@@ -55,9 +61,154 @@ function StatusBadge({ status }: { status: TaskStatus['status'] }) {
   }
 }
 
+// ── Stage timeline ──────────────────────────────────────────────────────────
+
+function StageTimeline({ status }: { status: TaskStatus }) {
+  const prog = status.progress
+  const result = status.result
+  const done = status.status === 'SUCCESS'
+  const failed = status.status === 'FAILURE'
+
+  const stage = prog?.stage ?? (done ? 'done' : failed ? 'failed' : 'pending')
+
+  const stages = [
+    {
+      key: 'fetching',
+      label: 'Fetch from Google Maps',
+      icon: Download,
+      detail:
+        stage === 'fetching'
+          ? 'Calling SerpAPI…'
+          : prog || done
+            ? `${(result ?? prog)?.total ?? prog?.total ?? 0} reviews found`
+            : null,
+    },
+    {
+      key: 'processing',
+      label: 'Sentiment + Embedding',
+      icon: Cpu,
+      detail:
+        stage === 'processing' && prog
+          ? `Processing review ${prog.processed + prog.skipped + 1} of ${prog.total}`
+          : done
+            ? `${result?.processed ?? 0} processed, ${result?.skipped ?? 0} skipped`
+            : null,
+    },
+    {
+      key: 'rate_limited',
+      label: 'Rate limit hit',
+      icon: AlertOctagon,
+      detail:
+        stage === 'rate_limited' && prog
+          ? `Stopped at ${prog.processed}/${prog.total} — ${prog.total - prog.processed - prog.skipped} reviews stranded`
+          : null,
+      isWarning: true,
+      hidden: stage !== 'rate_limited' && !(done && (result?.rate_limited ?? 0) > 0),
+    },
+  ]
+
+  function stageStatus(key: string): 'done' | 'active' | 'pending' | 'warning' {
+    if (failed) return key === 'fetching' ? 'active' : 'pending'
+    if (key === 'rate_limited') {
+      if (stage === 'rate_limited') return 'warning'
+      if (done && (result?.rate_limited ?? 0) > 0) return 'warning'
+      return 'pending'
+    }
+    const order = ['fetching', 'processing', 'done']
+    const current = done ? 'done' : stage
+    return order.indexOf(key) < order.indexOf(current)
+      ? 'done'
+      : order.indexOf(key) === order.indexOf(current)
+        ? 'active'
+        : 'pending'
+  }
+
+  return (
+    <div className="space-y-3">
+      {stages
+        .filter((s) => !s.hidden)
+        .map((s) => {
+          const Icon = s.icon
+          const st = stageStatus(s.key)
+          return (
+            <div key={s.key} className="flex items-start gap-3">
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                  st === 'done'
+                    ? 'bg-green-400/15 text-green-400'
+                    : st === 'active'
+                      ? 'bg-indigo-400/15 text-indigo-400'
+                      : st === 'warning'
+                        ? 'bg-yellow-400/15 text-yellow-400'
+                        : 'bg-slate-800 text-slate-600'
+                }`}
+              >
+                {st === 'active' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : st === 'done' ? (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                ) : (
+                  <Icon className="w-3.5 h-3.5" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p
+                  className={`text-xs font-medium ${
+                    st === 'pending' ? 'text-slate-500' : 'text-slate-200'
+                  }`}
+                >
+                  {s.label}
+                </p>
+                {s.detail && (
+                  <p
+                    className={`text-xs mt-0.5 ${
+                      st === 'warning' ? 'text-yellow-400/80' : 'text-slate-400'
+                    }`}
+                  >
+                    {s.detail}
+                  </p>
+                )}
+              </div>
+            </div>
+          )
+        })}
+    </div>
+  )
+}
+
+// ── Progress bar ────────────────────────────────────────────────────────────
+
+function ProgressBar({ status }: { status: TaskStatus }) {
+  const prog = status.progress
+  if (!prog || prog.total === 0) {
+    return (
+      <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+        <div className="h-full w-1/3 rounded-full bg-indigo-500 animate-pulse" />
+      </div>
+    )
+  }
+  const done = prog.processed + prog.skipped
+  const pct = Math.round((done / prog.total) * 100)
+  return (
+    <div className="space-y-1">
+      <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+        <div
+          className="h-full rounded-full bg-indigo-500 transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="text-xs text-slate-500 text-right">{pct}%</p>
+    </div>
+  )
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
+
 export function DataPipeline({ taskId, onReset }: Props) {
   const [status, setStatus] = useState<TaskStatus | null>(null)
   const [pollError, setPollError] = useState<string | null>(null)
+  const [reprocessTaskId, setReprocessTaskId] = useState<string | null>(null)
+  const [reprocessing, setReprocessing] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   function stopPolling() {
@@ -87,10 +238,28 @@ export function DataPipeline({ taskId, onReset }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId])
 
+  async function handleReprocess() {
+    setReprocessing(true)
+    try {
+      const { task_id } = await triggerReprocess()
+      setReprocessTaskId(task_id)
+    } catch {
+      // ignore — user can retry
+    } finally {
+      setReprocessing(false)
+    }
+  }
+
   const isTerminal =
     status?.status === 'SUCCESS' ||
     status?.status === 'FAILURE' ||
     status?.status === 'REVOKED'
+
+  const hasRateLimited =
+    (status?.progress?.stage === 'rate_limited') ||
+    (status?.status === 'SUCCESS' && (status.result?.rate_limited ?? 0) > 0)
+
+  const isRunning = !isTerminal && status !== null
 
   return (
     <div className="rounded-xl bg-slate-900 border border-slate-800 p-6 shadow-soft space-y-5">
@@ -103,7 +272,7 @@ export function DataPipeline({ taskId, onReset }: Props) {
         {status && <StatusBadge status={status.status} />}
       </div>
 
-      {/* Polling error */}
+      {/* Poll error */}
       {pollError && (
         <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs">
           <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -111,21 +280,13 @@ export function DataPipeline({ taskId, onReset }: Props) {
         </div>
       )}
 
-      {/* Live progress indicator */}
-      {!isTerminal && !pollError && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-            Scraping reviews and running sentiment analysis…
-          </div>
-          <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
-            <div className="h-full w-1/3 rounded-full bg-indigo-500 animate-pulse" />
-          </div>
-          <p className="text-xs text-slate-500">Polling every {POLL_INTERVAL_MS / 1000}s</p>
-        </div>
-      )}
+      {/* Stage timeline */}
+      {status && <StageTimeline status={status} />}
 
-      {/* Success result */}
+      {/* Progress bar — only while running */}
+      {isRunning && <ProgressBar status={status} />}
+
+      {/* Result stats */}
       {status?.status === 'SUCCESS' && status.result && (
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4 text-center">
@@ -146,24 +307,6 @@ export function DataPipeline({ taskId, onReset }: Props) {
         </div>
       )}
 
-      {/* Success notes */}
-      {status?.status === 'SUCCESS' && (
-        <div className="text-xs text-slate-400 leading-relaxed">
-          {status.result?.rate_limited && status.result.rate_limited > 0 ? (
-            <p className="text-yellow-400/80">
-              Some reviews hit the LLM rate limit. Go to the{' '}
-              <span className="text-yellow-300">AI Chat</span> page to query existing data, or re-run
-              ingestion to finish processing the remaining reviews.
-            </p>
-          ) : (
-            <p className="text-green-400/80">
-              All reviews scraped, cleaned, sentiment-analysed, and embedded. Head to{' '}
-              <span className="text-green-300">AI Chat</span> to start querying them.
-            </p>
-          )}
-        </div>
-      )}
-
       {/* Failure error */}
       {status?.status === 'FAILURE' && status.error && (
         <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
@@ -172,7 +315,35 @@ export function DataPipeline({ taskId, onReset }: Props) {
         </div>
       )}
 
-      {/* Reset button */}
+      {/* Rate-limit recovery */}
+      {hasRateLimited && (
+        <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 space-y-2">
+          <p className="text-xs text-yellow-300 font-medium">
+            Some reviews weren&apos;t fully processed due to the LLM rate limit.
+            They are saved in the DB — click below to resume processing.
+          </p>
+          {reprocessTaskId ? (
+            <p className="text-xs text-green-400">
+              Reprocess job queued — task ID: <span className="font-mono">{reprocessTaskId}</span>
+            </p>
+          ) : (
+            <button
+              onClick={handleReprocess}
+              disabled={reprocessing}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 text-xs font-medium transition-colors disabled:opacity-50"
+            >
+              {reprocessing ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="w-3.5 h-3.5" />
+              )}
+              Resume processing stranded reviews
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Reset */}
       {isTerminal && (
         <button
           onClick={onReset}

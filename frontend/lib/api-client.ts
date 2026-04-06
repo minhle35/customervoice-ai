@@ -70,13 +70,29 @@ export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
   })
 }
 
+export interface TaskProgress {
+  stage: 'fetching' | 'processing' | 'rate_limited'
+  total: number
+  processed: number
+  skipped: number
+  rate_limited: number
+}
+
 export interface TaskStatus {
   task_id: string
-  status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'RETRY' | 'REVOKED'
-  result?: { processed: number; skipped: number; rate_limited: number }
+  status: 'PENDING' | 'STARTED' | 'PROGRESS' | 'SUCCESS' | 'FAILURE' | 'RETRY' | 'REVOKED'
+  progress?: TaskProgress
+  result?: { processed: number; skipped: number; rate_limited: number; total: number }
   error?: string
 }
 
 export function getTaskStatus(taskId: string): Promise<TaskStatus> {
   return apiFetch<TaskStatus>(`/integrations/tasks/${taskId}`)
+}
+
+export function triggerReprocess(limit = 100): Promise<{ status: string; task_id: string }> {
+  return apiFetch<{ status: string; task_id: string }>(
+    `/integrations/reprocess?limit=${limit}`,
+    { method: 'POST' }
+  )
 }

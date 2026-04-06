@@ -13,13 +13,14 @@ _NO_RETRY = (RateLimitError,)
 
 @celery_app.task(
     name="ingest_platform",
+    bind=True,
     autoretry_for=_RETRYABLE,
     dont_autoretry_for=_NO_RETRY,
     retry_backoff=True,
     retry_kwargs={"max_retries": 3},
 )
-def ingest_platform(platform: str, business_id: str, params: dict | None = None):
-    return ingest(platform=platform, business_id=business_id, params=params or {})
+def ingest_platform(self, platform: str, business_id: str, params: dict | None = None):
+    return ingest(platform=platform, business_id=business_id, params=params or {}, task=self)
 
 
 @celery_app.task(

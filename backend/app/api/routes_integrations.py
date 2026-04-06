@@ -13,7 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from workers.celery_app import celery_app  # noqa: E402
-from workers.tasks import ingest_platform  # noqa: E402
+from workers.tasks import ingest_platform, process_unprocessed_reviews  # noqa: E402
 
 # Mounted at: /api/integrations
 router = APIRouter(prefix="/api/integrations", tags=["integrations"])
@@ -44,11 +44,20 @@ def search_google_places(
 def get_task_status(task_id: str):
     result = celery_app.AsyncResult(task_id)
     response: dict = {"task_id": task_id, "status": result.state}
-    if result.state == "SUCCESS":
+    if result.state == "PROGRESS":
+        response["progress"] = result.info  # {stage, total, processed, skipped, rate_limited}
+    elif result.state == "SUCCESS":
         response["result"] = result.result
     elif result.state == "FAILURE":
         response["error"] = str(result.info)
     return response
+
+
+@router.post("/reprocess", summary="POST /api/integrations/reprocess")
+def reprocess_unprocessed(limit: int = 100):
+    """Retry sentiment analysis + embedding for reviews stranded by rate limits."""
+    task = process_unprocessed_reviews.delay(limit=limit)
+    return {"status": "queued", "task_id": task.id}
 
 
 @router.post("/{platform}", summary="POST /api/integrations/{platform}")
