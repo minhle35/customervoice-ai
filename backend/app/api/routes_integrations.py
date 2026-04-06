@@ -16,10 +16,14 @@ from workers.celery_app import celery_app  # noqa: E402
 from workers.tasks import ingest_platform  # noqa: E402
 
 # Mounted at: /api/integrations
-router = APIRouter()
+router = APIRouter(prefix="/api/integrations", tags=["integrations"])
 
 
-@router.get("/google/search", response_model=list[PlaceResult], summary="GET /api/integrations/google/search")
+@router.get(
+    "/google/search",
+    response_model=list[PlaceResult],
+    summary="GET /api/integrations/google/search",
+)
 def search_google_places(
     q: str = Query(..., description="Business name to search"),
     country: str = Query("us", description="Two-letter country code, e.g. vn, au, us"),
@@ -31,7 +35,9 @@ def search_google_places(
     try:
         return SerpApiService().search_places(query=q, country=country)
     except RuntimeError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)
+        ) from exc
 
 
 @router.get("/tasks/{task_id}", summary="GET /api/integrations/tasks/{task_id}")
