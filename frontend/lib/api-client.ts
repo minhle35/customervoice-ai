@@ -11,9 +11,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     const text = await res.text()
     try {
       const json = JSON.parse(text)
-      throw new Error(json.detail ?? text)
-    } catch {
+      // FastAPI returns detail as a string (HTTPException) or array (Pydantic validation)
+      const detail = json.detail
+      if (typeof detail === 'string') throw new Error(detail)
+      if (Array.isArray(detail)) throw new Error(detail.map((e: { msg: string }) => e.msg).join(', '))
       throw new Error(text)
+    } catch (e) {
+      if (e instanceof Error) throw e
     }
   }
   return res.json() as Promise<T>
