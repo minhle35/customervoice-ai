@@ -53,10 +53,10 @@ def create_app() -> FastAPI:
     # ---------------------------------------------------------------------------
     # Routers
     # ---------------------------------------------------------------------------
-    app.include_router(routes_reviews.router, prefix="/api/reviews", tags=["reviews"])
-    app.include_router(routes_insights.router, prefix="/api/insights", tags=["insights"])
-    app.include_router(routes_chat.router, prefix="/api/chat", tags=["chat"])
-    app.include_router(routes_integrations.router, prefix="/api/integrations", tags=["integrations"])
+    app.include_router(routes_reviews.router)
+    app.include_router(routes_insights.router)
+    app.include_router(routes_chat.router)
+    app.include_router(routes_integrations.router)
 
     # ---------------------------------------------------------------------------
     # Health check
