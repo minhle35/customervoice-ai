@@ -11,6 +11,7 @@ from app.models.review import Platform, SentimentLabel
 # Request schemas
 # ---------------------------------------------------------------------------
 
+
 class ReviewCreate(BaseModel):
     platform: Platform
     platform_id: str = Field(..., min_length=1, max_length=255)
@@ -40,7 +41,10 @@ class ReviewUpdate(BaseModel):
 # Response schemas
 # ---------------------------------------------------------------------------
 
+
 class ReviewOut(BaseModel):
+    """Pydantic model representing SQLAlchemy Review ORM object, used for API responses."""
+
     id: UUID
     platform: Platform
     platform_id: str
@@ -57,6 +61,7 @@ class ReviewOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # Enable loading from ORM objects directly
     model_config = {"from_attributes": True}
 
 
@@ -68,6 +73,7 @@ class ReviewListOut(BaseModel):
 # ---------------------------------------------------------------------------
 # Ingestion trigger schema
 # ---------------------------------------------------------------------------
+
 
 class IngestRequest(BaseModel):
     platform: Platform

@@ -1,5 +1,3 @@
-"""POST /api/chat — RAG-powered Q&A over customer reviews."""
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -7,10 +5,11 @@ from app.database.database import get_db
 from app.schemas.insight_schema import ChatRequest, ChatResponse
 from app.services.rag_service import run_rag_pipeline
 
-router = APIRouter()
+# Mounted at: /api/chat
+router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
-@router.post("", response_model=ChatResponse)
+@router.post("", response_model=ChatResponse, summary="POST /api/chat")
 def chat(request: ChatRequest, db: Session = Depends(get_db)) -> ChatResponse:
     """Answer a business question grounded in customer review data.
 

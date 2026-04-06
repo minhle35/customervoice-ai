@@ -33,6 +33,8 @@ class SentimentLabel(str, enum.Enum):
 
 
 class Review(Base):
+    """SQLAlchemy model - represents a customer review - later we create a SQLAlchemy ORM object of Review"""
+
     __tablename__ = "reviews"
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -52,10 +54,14 @@ class Review(Base):
     author: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     rating: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # 1-5 or None
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    published_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # AI-enriched fields (populated after processing)
-    sentiment_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # -1.0 to 1.0
+    sentiment_score: Mapped[Optional[float]] = mapped_column(
+        Float, nullable=True
+    )  # -1.0 to 1.0
     sentiment_label: Mapped[Optional[SentimentLabel]] = mapped_column(
         Enum(SentimentLabel, name="sentiment_label_enum"), nullable=True
     )
@@ -77,7 +83,10 @@ class Review(Base):
 
     # Relationships
     embedding: Mapped[Optional["ReviewEmbedding"]] = relationship(
-        "ReviewEmbedding", back_populates="review", uselist=False, cascade="all, delete-orphan"
+        "ReviewEmbedding",
+        back_populates="review",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:
