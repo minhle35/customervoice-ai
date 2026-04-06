@@ -77,6 +77,6 @@ class ReviewListOut(BaseModel):
 
 class IngestRequest(BaseModel):
     platform: Platform
-    business_id: str = Field(..., min_length=1, max_length=255)
+    business_id: str | None = Field(None, min_length=1, max_length=255)
     # Platform-specific query params passed through to the ingestion pipeline
     params: dict = Field(default_factory=dict)
