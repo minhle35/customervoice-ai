@@ -11,10 +11,11 @@ from app.models.review import Platform
 from app.schemas.review_schema import ReviewListOut, ReviewOut
 from app.services.review_service import ReviewService
 
-router = APIRouter()
+# Mounted at: /api/reviews
+router = APIRouter(prefix="/api/reviews", tags=["reviews"])
 
 
-@router.get("", response_model=ReviewListOut)
+@router.get("", response_model=ReviewListOut, summary="GET /api/reviews")
 def list_reviews(
     business_id: Optional[str] = Query(None),
     platform: Optional[Platform] = Query(None),
@@ -31,13 +32,20 @@ def list_reviews(
         limit=limit,
         offset=offset,
     )
-    return ReviewListOut(total=total, items=items)
+    return ReviewListOut(
+        total=total,
+        items=[ReviewOut.model_validate(item, from_attributes=True) for item in items],
+    )
 
 
-@router.get("/{review_id}", response_model=ReviewOut)
+@router.get(
+    "/{review_id}", response_model=ReviewOut, summary="GET /api/reviews/{review_id}"
+)
 def get_review(review_id: uuid.UUID, db: Session = Depends(get_db)):
     """Fetch a single review by ID."""
     review = ReviewService(db).get_by_id(review_id)
     if review is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
-    return review
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Review not found"
+        )
+    return ReviewOut.model_validate(review, from_attributes=True)
