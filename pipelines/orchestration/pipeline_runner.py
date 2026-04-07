@@ -6,7 +6,9 @@ import time
 from openai import RateLimitError
 
 from app.config import get_settings
-from app.database.database import get_session
+from app.database.database import (
+    get_session,
+)  # Since we call from Celery - no FastAPI context, need explicit context manager for DB sessions
 from app.models.review import Platform
 from app.schemas.review_schema import ReviewUpdate
 from app.services.embedding_service import EmbeddingService

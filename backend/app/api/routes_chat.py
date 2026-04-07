@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
-from app.database.database import get_db
+from app.database.database import SessionDep
 from app.schemas.insight_schema import ChatRequest, ChatResponse
 from app.services.rag_service import run_rag_pipeline
 
@@ -10,7 +9,7 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
 @router.post("", response_model=ChatResponse, summary="POST /api/chat")
-def chat(request: ChatRequest, db: Session = Depends(get_db)) -> ChatResponse:
+def chat(request: ChatRequest, db: SessionDep) -> ChatResponse:
     """Answer a business question grounded in customer review data.
 
     - Embeds the latest user message with `query:` prefix (multilingual-e5-base)

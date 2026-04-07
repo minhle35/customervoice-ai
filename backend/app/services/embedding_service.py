@@ -11,7 +11,9 @@ class EmbeddingService:
     def __init__(self, db: Session):
         self.db = db
 
-    def upsert_embedding(self, review_id, embedding: list[float], model: str) -> ReviewEmbedding:
+    def upsert_embedding(
+        self, review_id, embedding: list[float], model: str
+    ) -> ReviewEmbedding:
         stmt = (
             insert(ReviewEmbedding)
             .values(review_id=review_id, embedding=embedding, model=model)
