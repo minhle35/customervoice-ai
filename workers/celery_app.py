@@ -50,8 +50,8 @@ if str(BACKEND) not in sys.path:
 
 celery_app = Celery(
     "customer_voice_ai",
-    broker=settings.celery_broker_url,
-    backend=settings.celery_result_backend,
+    broker=settings.celery.broker_url,
+    backend=settings.celery.result_backend,
     include=["workers.tasks"],
 )
 

@@ -4,11 +4,12 @@ from pgvector.sqlalchemy import Vector  # registers Vector type with SQLAlchemy 
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.config import settings
+from app.config import get_settings
 from app.models.base import Base  # noqa: F401 – imported so Alembic can discover models
 
+_s = get_settings()
 engine = create_engine(
-    settings.database_url,
+    _s.db.url,
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
