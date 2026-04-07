@@ -1,4 +1,6 @@
+import logging
 import os
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI, Request, status
@@ -7,6 +9,9 @@ from fastapi.responses import JSONResponse
 
 from app.api import routes_chat, routes_insights, routes_integrations, routes_reviews
 from app.config import get_settings
+from app.database.database import init_db
+
+logger = logging.getLogger(__name__)
 
 _settings = get_settings()
 
@@ -14,6 +19,14 @@ _settings = get_settings()
 os.environ.setdefault("LANGCHAIN_TRACING_V2", _settings.langchain_tracing_v2)
 os.environ.setdefault("LANGCHAIN_API_KEY", _settings.langchain_api_key)
 os.environ.setdefault("LANGCHAIN_PROJECT", _settings.langchain_project)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger.info("Starting up CustomerVoice AI API")
+    init_db()
+    yield
+    logger.info("Shutting down CustomerVoice AI API")
 
 
 def create_app() -> FastAPI:
@@ -24,6 +37,7 @@ def create_app() -> FastAPI:
         version=settings.server_version,
         docs_url="/docs" if settings.app_env != "production" else None,
         redoc_url="/redoc" if settings.app_env != "production" else None,
+        lifespan=lifespan,
     )
 
     # ---------------------------------------------------------------------------

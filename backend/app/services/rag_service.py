@@ -7,7 +7,7 @@ from pathlib import Path
 from uuid import UUID
 
 from sqlalchemy.orm import Session
-from app.config import settings
+from app.config import get_settings
 from pipelines.rag.answer_generator import generate_answer
 from pipelines.rag.retriever import embed_query, rerank, retrieve
 
@@ -52,12 +52,13 @@ def run_rag_pipeline(
 
     reranked = rerank(question, candidates, final_top_k=rerank_top_k)
 
+    _settings = get_settings()
     answer, used_chunks = generate_answer(
         question=question,
         chunks=reranked,
-        api_key=settings.openrouter_api_key,
-        base_url=settings.openrouter_base_url,
-        model=settings.openrouter_chat_model,
+        api_key=_settings.openrouter_api_key,
+        base_url=_settings.openrouter_base_url,
+        model=_settings.openrouter_chat_model,
         token_budget=token_budget,
     )
 

@@ -20,7 +20,7 @@ from dataclasses import dataclass
 
 import httpx
 
-from app.config import settings
+from app.config import get_settings
 
 SERPAPI_ENDPOINT = "https://serpapi.com/search.json"
 _MAX_CANDIDATES = 5
@@ -29,8 +29,8 @@ _MAX_CANDIDATES = 5
 @dataclass
 class PlaceResult:
     title: str
-    data_id: str                # SerpAPI hex ID — pass as params["data_id"] to ingestion
-    place_id: str | None        # Google Place ID (ChIJ...) — used as business_id in DB
+    data_id: str  # SerpAPI hex ID — pass as params["data_id"] to ingestion
+    place_id: str | None  # Google Place ID (ChIJ...) — used as business_id in DB
     address: str | None
     rating: float | None
     reviews_count: int | None
@@ -38,7 +38,7 @@ class PlaceResult:
 
 class SerpApiService:
     def __init__(self, api_key: str | None = None) -> None:
-        self._api_key = api_key or settings.google_reviews_api_key
+        self._api_key = api_key or get_settings().google_reviews_api_key
         if not self._api_key:
             raise ValueError("GOOGLE_REVIEWS_API_KEY is not set")
 

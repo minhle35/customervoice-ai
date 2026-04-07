@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from app.config import settings
+from app.config import get_settings
 from app.models.review import Platform
 from app.schemas.review_schema import ReviewCreate
 
@@ -33,7 +33,7 @@ def _parse_datetime(value: Any) -> datetime | None:
 
 
 def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
-    api_key = settings.google_reviews_api_key
+    api_key = get_settings().google_reviews_api_key
     if not api_key:
         raise ValueError("GOOGLE_REVIEWS_API_KEY is not set")
 
@@ -70,7 +70,9 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
 
         content = item.get("snippet") or item.get("content") or item.get("text") or ""
         rating = item.get("rating")
-        published_at = _parse_datetime(item.get("timestamp") or item.get("time") or item.get("published_at"))
+        published_at = _parse_datetime(
+            item.get("timestamp") or item.get("time") or item.get("published_at")
+        )
         platform_id = item.get("review_id") or item.get("id")
         if not platform_id:
             platform_id = _stable_id(str(author), str(published_at), content)
