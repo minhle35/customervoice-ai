@@ -5,8 +5,10 @@ import time
 
 from openai import RateLimitError
 
-from app.config import settings
-from app.database.database import SessionLocal
+from app.config import get_settings
+from app.database.database import (
+    get_session,
+)  # Since we call from Celery - no FastAPI context, need explicit context manager for DB sessions
 from app.models.review import Platform
 from app.schemas.review_schema import ReviewUpdate
 from app.services.embedding_service import EmbeddingService
@@ -46,12 +48,14 @@ def _process_review(review_service, embedding_service, stored) -> bool:
     embedding_service.upsert_embedding(
         review_id=stored.id,
         embedding=embedding,
-        model=settings.embedding_model,
+        model=get_settings().embedding_model,
     )
     return True
 
 
-def _emit(task, stage: str, total: int, processed: int, skipped: int, rate_limited: int) -> None:
+def _emit(
+    task, stage: str, total: int, processed: int, skipped: int, rate_limited: int
+) -> None:
     """Push a PROGRESS state update to Celery's result backend if a task handle is provided."""
     if task is None:
         return
@@ -88,7 +92,7 @@ def ingest(platform: str | Platform, business_id: str, params: dict, task=None) 
 
     _emit(task, "processing", total=total, processed=0, skipped=0, rate_limited=0)
 
-    with SessionLocal() as db:
+    with get_session() as db:
         review_service = ReviewService(db)
         embedding_service = EmbeddingService(db)
 
@@ -107,19 +111,38 @@ def ingest(platform: str | Platform, business_id: str, params: dict, task=None) 
                     "%d review(s) left unprocessed; run process_unprocessed to finish.",
                     total - processed - skipped - rate_limited,
                 )
-                _emit(task, "rate_limited", total=total, processed=processed, skipped=skipped, rate_limited=rate_limited)
+                _emit(
+                    task,
+                    "rate_limited",
+                    total=total,
+                    processed=processed,
+                    skipped=skipped,
+                    rate_limited=rate_limited,
+                )
                 break
 
-            _emit(task, "processing", total=total, processed=processed, skipped=skipped, rate_limited=rate_limited)
+            _emit(
+                task,
+                "processing",
+                total=total,
+                processed=processed,
+                skipped=skipped,
+                rate_limited=rate_limited,
+            )
 
-    return {"processed": processed, "skipped": skipped, "rate_limited": rate_limited, "total": total}
+    return {
+        "processed": processed,
+        "skipped": skipped,
+        "rate_limited": rate_limited,
+        "total": total,
+    }
 
 
 def process_unprocessed(limit: int = 100) -> dict:
     processed = 0
     rate_limited = 0
 
-    with SessionLocal() as db:
+    with get_session() as db:
         review_service = ReviewService(db)
         embedding_service = EmbeddingService(db)
 

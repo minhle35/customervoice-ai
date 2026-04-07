@@ -8,7 +8,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
-from app.config import settings
+from app.config import get_settings
+
+settings = get_settings()
 
 # intfloat/multilingual-e5-base produces 768-dimension vectors
 EMBEDDING_DIMENSIONS = 768

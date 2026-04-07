@@ -1,14 +1,10 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-
-# Use the app's pydantic-settings config as the single source of truth
-from app.config import settings
-
-# Import ALL models so Alembic can detect schema changes
-from app.models import Base  # noqa: F401
+from app.config import get_settings
+from app.models import Base  # noqa: F401 — registers all models with metadata
 from app.models import Insight, Review, ReviewEmbedding  # noqa: F401
+from sqlalchemy import engine_from_config, pool
 
 # Alembic Config object — gives access to alembic.ini values
 config = context.config
@@ -20,7 +16,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # Override sqlalchemy.url from validated pydantic settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", get_settings().db.url)
 
 
 def run_migrations_offline() -> None:

@@ -36,11 +36,14 @@ curl -X POST "http://localhost:8000/api/integrations/google" \
 """
 
 from __future__ import annotations
-from app.config import settings
+
 import sys
 from pathlib import Path
 
 from celery import Celery
+from celery.signals import worker_init
+
+from app.config import get_settings
 
 ROOT = Path(__file__).resolve().parents[1]
 BACKEND = ROOT / "backend"
@@ -50,8 +53,8 @@ if str(BACKEND) not in sys.path:
 
 celery_app = Celery(
     "customer_voice_ai",
-    broker=settings.celery_broker_url,
-    backend=settings.celery_result_backend,
+    broker=get_settings().celery.broker_url,
+    backend=get_settings().celery.result_backend,
     include=["workers.tasks"],
 )
 
@@ -62,3 +65,10 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
 )
+
+
+@worker_init.connect
+def init_worker_database(**kwargs):
+    """Initialise DB connection pool when the Celery worker process starts."""
+    from app.database.database import init_db
+    init_db()

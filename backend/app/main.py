@@ -1,4 +1,6 @@
+import logging
 import os
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI, Request, status
@@ -6,28 +8,44 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import routes_chat, routes_insights, routes_integrations, routes_reviews
-from app.config import settings
+from app.config import get_settings
+from app.database.database import init_db
+
+logger = logging.getLogger(__name__)
+
+_settings = get_settings()
 
 # Propagate LangSmith settings to os.environ so LangChain picks them up automatically
-os.environ.setdefault("LANGCHAIN_TRACING_V2", settings.langchain_tracing_v2)
-os.environ.setdefault("LANGCHAIN_API_KEY", settings.langchain_api_key)
-os.environ.setdefault("LANGCHAIN_PROJECT", settings.langchain_project)
+os.environ.setdefault("LANGCHAIN_TRACING_V2", _settings.langchain_tracing_v2)
+os.environ.setdefault("LANGCHAIN_API_KEY", _settings.langchain_api_key)
+os.environ.setdefault("LANGCHAIN_PROJECT", _settings.langchain_project)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger.info("Starting up CustomerVoice AI API")
+    init_db()
+    yield
+    logger.info("Shutting down CustomerVoice AI API")
 
 
 def create_app() -> FastAPI:
+    settings = get_settings()
+
     app = FastAPI(
         title="CustomerVoice AI API",
-        version="0.1.0",
+        version=settings.server_version,
         docs_url="/docs" if settings.app_env != "production" else None,
         redoc_url="/redoc" if settings.app_env != "production" else None,
+        lifespan=lifespan,
     )
 
     # ---------------------------------------------------------------------------
-    # CORS — allow the Next.js frontend (adjust origins in production)
+    # CORS — origins driven by settings, not hardcoded
     # ---------------------------------------------------------------------------
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000"],
+        allow_origins=settings.allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -44,7 +62,9 @@ def create_app() -> FastAPI:
         )
 
     @app.exception_handler(Exception)
-    async def unhandled_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
+    async def unhandled_exception_handler(
+        _request: Request, exc: Exception
+    ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "Internal server error"},
@@ -72,9 +92,10 @@ app = create_app()
 
 
 if __name__ == "__main__":
+    settings = get_settings()
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=8000,
+        host=settings.server_host,
+        port=settings.server_port,
         reload=settings.app_env == "development",
     )

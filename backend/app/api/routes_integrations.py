@@ -45,7 +45,9 @@ def get_task_status(task_id: str):
     result = celery_app.AsyncResult(task_id)
     response: dict = {"task_id": task_id, "status": result.state}
     if result.state == "PROGRESS":
-        response["progress"] = result.info  # {stage, total, processed, skipped, rate_limited}
+        response["progress"] = (
+            result.info
+        )  # {stage, total, processed, skipped, rate_limited}
     elif result.state == "SUCCESS":
         response["result"] = result.result
     elif result.state == "FAILURE":

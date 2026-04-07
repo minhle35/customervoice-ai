@@ -11,6 +11,9 @@ from sentence_transformers import CrossEncoder, SentenceTransformer
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+
+from app.config import get_settings
+
 # Make `app` importable when this module is run from the project root
 _ROOT = Path(__file__).parent.parent.parent
 _BACKEND = _ROOT / "backend"
@@ -18,7 +21,6 @@ for _p in [str(_ROOT), str(_BACKEND)]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from app.config import settings  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Model singletons — loaded once per process
@@ -33,7 +35,7 @@ CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 def _get_encoder() -> SentenceTransformer:
     global _encoder
     if _encoder is None:
-        _encoder = SentenceTransformer(settings.embedding_model)
+        _encoder = SentenceTransformer(get_settings().embedding_model)
     return _encoder
 
 

@@ -8,7 +8,7 @@ from typing import Optional
 from openai import OpenAI
 from app.models.review import SentimentLabel
 
-from app.config import settings
+from app.config import get_settings
 
 
 @dataclass
@@ -20,8 +20,8 @@ class SentimentResult:
 
 def _client() -> OpenAI:
     return OpenAI(
-        api_key=settings.openrouter_api_key,
-        base_url=settings.openrouter_base_url,
+        api_key=get_settings().openrouter_api_key,
+        base_url=get_settings().openrouter_base_url,
     )
 
 
@@ -54,7 +54,7 @@ def analyze_sentiment_and_topics(text: str, max_topics: int = 5) -> SentimentRes
         'Example: {"sentiment_score": 0.8, "sentiment_label": "positive", "topics": ["food quality", "service"]}'
     )
     resp = _client().chat.completions.create(
-        model=settings.openrouter_chat_model,
+        model=get_settings().openrouter_chat_model,
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": text},

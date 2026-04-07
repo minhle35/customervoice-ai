@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sentence_transformers import SentenceTransformer
 
-from app.config import settings
+from app.config import get_settings
 
 # Load once at module level — avoids reloading the model on every call
 _model: SentenceTransformer | None = None
@@ -11,7 +11,7 @@ _model: SentenceTransformer | None = None
 def _get_model() -> SentenceTransformer:
     global _model
     if _model is None:
-        _model = SentenceTransformer(settings.embedding_model)
+        _model = SentenceTransformer(get_settings().embedding_model)
     return _model
 
 
