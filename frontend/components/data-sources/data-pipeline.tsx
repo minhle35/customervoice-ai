@@ -89,7 +89,7 @@ function StageTimeline({ status }: { status: TaskStatus }) {
       icon: Cpu,
       detail:
         stage === 'processing' && prog
-          ? `Processing review ${prog.processed + prog.skipped + 1} of ${prog.total}`
+          ? `Processing review ${(prog.processed ?? 0) + (prog.skipped ?? 0) + 1} of ${prog.total ?? 0}`
           : done
             ? `${result?.processed ?? 0} processed, ${result?.skipped ?? 0} skipped`
             : null,
@@ -100,7 +100,7 @@ function StageTimeline({ status }: { status: TaskStatus }) {
       icon: AlertOctagon,
       detail:
         stage === 'rate_limited' && prog
-          ? `Stopped at ${prog.processed}/${prog.total} — ${prog.total - prog.processed - prog.skipped} reviews stranded`
+          ? `Stopped at ${prog.processed ?? 0}/${prog.total ?? 0} — ${(prog.total ?? 0) - (prog.processed ?? 0) - (prog.skipped ?? 0)} reviews stranded`
           : null,
       isWarning: true,
       hidden: stage !== 'rate_limited' && !(done && (result?.rate_limited ?? 0) > 0),
@@ -187,8 +187,8 @@ function ProgressBar({ status }: { status: TaskStatus }) {
       </div>
     )
   }
-  const done = prog.processed + prog.skipped
-  const pct = Math.round((done / prog.total) * 100)
+  const done = (prog.processed ?? 0) + (prog.skipped ?? 0)
+  const pct = Math.round((done / (prog.total ?? 1)) * 100)
   return (
     <div className="space-y-1">
       <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
