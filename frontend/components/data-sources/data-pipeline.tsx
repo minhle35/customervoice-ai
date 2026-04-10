@@ -188,7 +188,7 @@ function ProgressBar({ status }: { status: TaskStatus }) {
     )
   }
   const done = (prog.processed ?? 0) + (prog.skipped ?? 0)
-  const pct = Math.round((done / prog.total) * 100)
+  const pct = Math.round((done / (prog.total ?? 1)) * 100)
   return (
     <div className="space-y-1">
       <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
