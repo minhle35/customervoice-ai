@@ -48,7 +48,7 @@ function TypingDots() {
 }
 
 export default function AIChatPage() {
-  const { entries, isLoading, error, sendMessage, clearChat } = useChat()
+  const { entries, isLoading, error, sendMessage, clearChat, businesses, selectedBusinessId, setSelectedBusinessId } = useChat()
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -72,10 +72,34 @@ export default function AIChatPage() {
   }
 
   const isEmpty = entries.length === 0
+  const selectedBusiness = businesses.find((b) => b.business_id === selectedBusinessId)
 
   return (
     <div className="min-h-full flex flex-col">
-      <TopNav title="AI Chat" subtitle="Ask questions about your customer reviews" />
+      <TopNav
+        title="AI Chat"
+        subtitle={selectedBusiness?.business_name ?? 'Ask questions about your customer reviews'}
+      />
+      {businesses.length > 1 && (
+        <div className="px-6 pt-4">
+          <select
+            value={selectedBusinessId ?? ''}
+            onChange={(e) => { clearChat(); setSelectedBusinessId(e.target.value) }}
+            className="text-xs bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+          >
+            {businesses.map((b) => (
+              <option key={b.business_id} value={b.business_id}>
+                {b.business_name ?? b.business_id}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {businesses.length === 0 && (
+        <div className="px-6 pt-4">
+          <p className="text-xs text-slate-500">No businesses found. Ingest some reviews first in Data Sources.</p>
+        </div>
+      )}
 
       <div className="flex-1 flex flex-col p-6 gap-4 min-h-0">
 
@@ -155,6 +179,9 @@ export default function AIChatPage() {
                       <CitationText text={entry.content} />
                       {entry.sources && entry.sources.length > 0 && (
                         <p className="text-[10px] text-slate-600 mt-2 border-t border-slate-800 pt-2">
+                          {selectedBusiness?.business_name && (
+                            <span className="text-slate-500">{selectedBusiness.business_name} · </span>
+                          )}
                           Based on {entry.sources.length} review{entry.sources.length > 1 ? 's' : ''}
                         </p>
                       )}
@@ -197,7 +224,7 @@ export default function AIChatPage() {
         </div>
 
         <p className="text-center text-[10px] text-slate-700">
-          Answers grounded in real reviews · RAG pipeline · Llama 3.3 70B via OpenRouter
+          Answers grounded in real reviews · RAG pipeline 
         </p>
       </div>
     </div>

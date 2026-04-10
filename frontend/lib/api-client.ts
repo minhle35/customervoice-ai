@@ -48,6 +48,15 @@ export function getReview(id: string): Promise<Review> {
   return apiFetch<Review>(`/reviews/${id}`)
 }
 
+export interface Business {
+  business_id: string
+  business_name: string | null
+}
+
+export function getBusinesses(): Promise<Business[]> {
+  return apiFetch<Business[]>('/reviews/businesses')
+}
+
 export interface PlaceResult {
   title: string
   data_id: string

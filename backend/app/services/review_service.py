@@ -131,3 +131,12 @@ class ReviewService:
 
     def get_by_id(self, review_id: uuid.UUID) -> Optional[Review]:
         return self.db.get(Review, review_id)
+
+    def get_distinct_businesses(self) -> list[dict]:
+        """Return distinct business_id + business_name pairs, ordered by name."""
+        rows = self.db.execute(
+            select(Review.business_id, Review.business_name)
+            .distinct(Review.business_id)
+            .order_by(Review.business_id)
+        ).all()
+        return [{"business_id": r.business_id, "business_name": r.business_name} for r in rows]

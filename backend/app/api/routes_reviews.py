@@ -14,6 +14,12 @@ from app.services.review_service import ReviewService
 router = APIRouter(prefix="/api/reviews", tags=["reviews"])
 
 
+@router.get("/businesses", summary="GET /api/reviews/businesses")
+def list_businesses(db: SessionDep) -> list[dict]:
+    """Return distinct businesses that have ingested reviews."""
+    return ReviewService(db).get_distinct_businesses()
+
+
 @router.get("", response_model=ReviewListOut, summary="GET /api/reviews")
 def list_reviews(
     db: SessionDep,
