@@ -69,7 +69,7 @@ export function triggerIngestion(
   return apiFetch<{ status: string; task_id: string }>(`/integrations/${platform}`, {
     method: 'POST',
     body: JSON.stringify(payload),
-  })
+  });
 }
 
 export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
@@ -80,11 +80,14 @@ export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
 }
 
 export interface TaskProgress {
-  stage: 'fetching' | 'processing' | 'rate_limited'
-  total: number
-  processed: number
-  skipped: number
-  rate_limited: number
+  stage: 'fetching' | 'saving' | 'processing' | 'rate_limited'
+  // saving stage
+  total?: number
+  saved?: number
+  // processing / rate_limited stage
+  processed?: number
+  skipped?: number
+  rate_limited?: number
 }
 
 export interface TaskStatus {
