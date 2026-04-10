@@ -1,4 +1,3 @@
-import logging
 import os
 from contextlib import asynccontextmanager
 
@@ -10,8 +9,10 @@ from fastapi.responses import JSONResponse
 from app.api import routes_chat, routes_insights, routes_integrations, routes_reviews
 from app.config import get_settings
 from app.database.database import init_db
+from app.logger import configure_logging, get_logger
 
-logger = logging.getLogger(__name__)
+configure_logging(get_settings())
+logger = get_logger(__name__)
 
 _settings = get_settings()
 

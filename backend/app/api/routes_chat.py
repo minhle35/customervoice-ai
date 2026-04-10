@@ -1,8 +1,11 @@
 from fastapi import APIRouter, HTTPException, status
 
 from app.database.database import SessionDep
+from app.logger import get_logger
 from app.schemas.insight_schema import ChatRequest, ChatResponse
 from app.services.rag_service import run_rag_pipeline
+
+logger = get_logger(__name__)
 
 # Mounted at: /api/chat
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -35,9 +38,10 @@ def chat(request: ChatRequest, db: SessionDep) -> ChatResponse:
             business_id=request.business_id,
         )
     except Exception as exc:
+        logger.error("RAG pipeline error for business_id=%s: %s", request.business_id, exc, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"RAG pipeline error: {exc}",
+            detail="Failed to generate an answer. Try again later.",
         ) from exc
 
     return ChatResponse(answer=answer, sources=source_ids)
