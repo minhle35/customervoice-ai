@@ -47,6 +47,11 @@ RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
 # Activate venv
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Run as non-root user — limits blast radius if the app is compromised
+RUN useradd --no-create-home --shell /bin/false appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f "http://localhost:${PORT}/health" || exit 1
