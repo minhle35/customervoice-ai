@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { sendChatMessage } from '@/lib/api-client'
+import { useState, useCallback, useEffect } from 'react'
+import { sendChatMessage, getBusinesses, getChatHistory } from '@/lib/api-client'
+import type { Business } from '@/lib/api-client'
 import type { ChatMessage } from '@/types'
-
-const DEFAULT_BUSINESS_ID = 'ChIJN1t_tDeuEmsRUsoyG83frY4'
 
 export interface ChatEntry {
   role: ChatMessage['role']
@@ -13,14 +12,38 @@ export interface ChatEntry {
   isLoading?: boolean
 }
 
-export function useChat(businessId: string = DEFAULT_BUSINESS_ID) {
+export function useChat() {
   const [entries, setEntries] = useState<ChatEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [businesses, setBusinesses] = useState<Business[]>([])
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null)
+
+  // Load businesses once, auto-select first
+  useEffect(() => {
+    getBusinesses().then((list) => {
+      setBusinesses(list)
+      if (list.length > 0) setSelectedBusinessId(list[0].business_id)
+    }).catch(() => {})
+  }, [])
+
+  // Load persisted history whenever the selected business changes
+  useEffect(() => {
+    if (!selectedBusinessId) return
+    setEntries([])
+    setError(null)
+    getChatHistory(selectedBusinessId).then((history) => {
+      setEntries(history.map((m) => ({
+        role: m.role as ChatEntry['role'],
+        content: m.content,
+        sources: m.sources,
+      })))
+    }).catch(() => {})
+  }, [selectedBusinessId])
 
   const sendMessage = useCallback(
     async (question: string) => {
-      if (!question.trim() || isLoading) return
+      if (!question.trim() || isLoading || !selectedBusinessId) return
 
       const userEntry: ChatEntry = { role: 'user', content: question }
       const placeholderEntry: ChatEntry = { role: 'assistant', content: '', isLoading: true }
@@ -36,7 +59,7 @@ export function useChat(businessId: string = DEFAULT_BUSINESS_ID) {
       ]
 
       try {
-        const res = await sendChatMessage({ business_id: businessId, messages })
+        const res = await sendChatMessage({ business_id: selectedBusinessId, messages })
         setEntries((prev) => [
           ...prev.slice(0, -1), // remove placeholder
           { role: 'assistant', content: res.answer, sources: res.sources },
@@ -49,7 +72,7 @@ export function useChat(businessId: string = DEFAULT_BUSINESS_ID) {
         setIsLoading(false)
       }
     },
-    [entries, isLoading, businessId]
+    [entries, isLoading, selectedBusinessId]
   )
 
   const clearChat = useCallback(() => {
@@ -57,5 +80,5 @@ export function useChat(businessId: string = DEFAULT_BUSINESS_ID) {
     setError(null)
   }, [])
 
-  return { entries, isLoading, error, sendMessage, clearChat }
+  return { entries, isLoading, error, sendMessage, clearChat, businesses, selectedBusinessId, setSelectedBusinessId }
 }

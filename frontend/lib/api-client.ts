@@ -48,6 +48,15 @@ export function getReview(id: string): Promise<Review> {
   return apiFetch<Review>(`/reviews/${id}`)
 }
 
+export interface Business {
+  business_id: string
+  business_name: string | null
+}
+
+export function getBusinesses(): Promise<Business[]> {
+  return apiFetch<Business[]>('/reviews/businesses')
+}
+
 export interface PlaceResult {
   title: string
   data_id: string
@@ -70,6 +79,18 @@ export function triggerIngestion(
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export interface ChatHistoryMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  sources: string[]
+  created_at: string
+}
+
+export function getChatHistory(businessId: string): Promise<ChatHistoryMessage[]> {
+  return apiFetch<ChatHistoryMessage[]>(`/chat/${businessId}/history`)
 }
 
 export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {

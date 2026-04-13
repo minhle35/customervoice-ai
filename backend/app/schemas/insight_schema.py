@@ -73,3 +73,13 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     sources: list[UUID] = Field(default_factory=list)  # review IDs used as context
+
+
+class ChatHistoryMessage(BaseModel):
+    id: UUID
+    role: str
+    content: str
+    sources: list[UUID] = Field(default_factory=list)
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

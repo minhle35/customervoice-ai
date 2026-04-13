@@ -5,8 +5,11 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query, status
 
+from app.logger import get_logger
 from app.schemas.review_schema import IngestRequest
 from app.services.serpapi_service import PlaceResult, SerpApiService
+
+logger = get_logger(__name__)
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
@@ -35,8 +38,10 @@ def search_google_places(
     try:
         return SerpApiService().search_places(query=q, country=country)
     except RuntimeError as exc:
+        logger.error("SerpAPI search failed: %s", exc)
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to reach Google Maps search. Try again later.",
         ) from exc
 
 
@@ -51,7 +56,8 @@ def get_task_status(task_id: str):
     elif result.state == "SUCCESS":
         response["result"] = result.result
     elif result.state == "FAILURE":
-        response["error"] = str(result.info)
+        logger.error("Task %s failed: %s", task_id, result.info)
+        response["error"] = "Task failed. Check worker logs for details."
     return response
 
 
@@ -62,18 +68,27 @@ def reprocess_unprocessed(limit: int = 100):
     return {"status": "queued", "task_id": task.id}
 
 
+def _derive_business_id(place_id: str | None, data_id: str | None) -> str:
+    """Derive a stable business_id from Google Maps identifiers.
+
+    place_id (ChIJ...) is Google's canonical stable ID and is preferred.
+    data_id (0x3177...) is always returned by SerpAPI and is used as fallback —
+    both encode the same underlying Google Maps CID.
+
+    Raises ValueError if neither is available.
+    """
+    bid = place_id or data_id
+    if not bid:
+        raise ValueError("Cannot derive business_id: params must include place_id or data_id.")
+    return bid
+
+
 @router.post("/{platform}", summary="POST /api/integrations/{platform}")
 def trigger_ingestion(platform: str, payload: IngestRequest):
-    # business_id: prefer explicit value, then place_id (ChIJ...) from params, then data_id
-    business_id = (
-        payload.business_id
-        or payload.params.get("place_id")
-        or payload.params.get("data_id")
+    # ValueError from _derive_business_id propagates to the global handler in main.py → 422
+    business_id = _derive_business_id(
+        place_id=payload.business_id or payload.params.get("place_id"),
+        data_id=payload.params.get("data_id"),
     )
-    if not business_id:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Cannot derive business_id: provide business_id, params.place_id, or params.data_id.",
-        )
     task = ingest_platform.delay(payload.platform.value, business_id, payload.params)
     return {"status": "queued", "task_id": task.id}
