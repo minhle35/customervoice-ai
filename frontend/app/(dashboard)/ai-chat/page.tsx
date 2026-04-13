@@ -84,7 +84,7 @@ export default function AIChatPage() {
         <div className="px-6 pt-4">
           <select
             value={selectedBusinessId ?? ''}
-            onChange={(e) => { clearChat(); setSelectedBusinessId(e.target.value) }}
+            onChange={(e) => setSelectedBusinessId(e.target.value)}
             className="text-xs bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
           >
             {businesses.map((b) => (

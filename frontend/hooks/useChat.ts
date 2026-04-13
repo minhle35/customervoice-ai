@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { sendChatMessage, getBusinesses } from '@/lib/api-client'
+import { sendChatMessage, getBusinesses, getChatHistory } from '@/lib/api-client'
 import type { Business } from '@/lib/api-client'
 import type { ChatMessage } from '@/types'
 
@@ -19,12 +19,27 @@ export function useChat() {
   const [businesses, setBusinesses] = useState<Business[]>([])
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null)
 
+  // Load businesses once, auto-select first
   useEffect(() => {
     getBusinesses().then((list) => {
       setBusinesses(list)
       if (list.length > 0) setSelectedBusinessId(list[0].business_id)
-    }).catch(() => {/* no businesses yet */})
+    }).catch(() => {})
   }, [])
+
+  // Load persisted history whenever the selected business changes
+  useEffect(() => {
+    if (!selectedBusinessId) return
+    setEntries([])
+    setError(null)
+    getChatHistory(selectedBusinessId).then((history) => {
+      setEntries(history.map((m) => ({
+        role: m.role as ChatEntry['role'],
+        content: m.content,
+        sources: m.sources,
+      })))
+    }).catch(() => {})
+  }, [selectedBusinessId])
 
   const sendMessage = useCallback(
     async (question: string) => {

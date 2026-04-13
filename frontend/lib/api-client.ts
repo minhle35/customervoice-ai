@@ -81,6 +81,18 @@ export function triggerIngestion(
   });
 }
 
+export interface ChatHistoryMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  sources: string[]
+  created_at: string
+}
+
+export function getChatHistory(businessId: string): Promise<ChatHistoryMessage[]> {
+  return apiFetch<ChatHistoryMessage[]>(`/chat/${businessId}/history`)
+}
+
 export function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
   return apiFetch<ChatResponse>('/chat', {
     method: 'POST',
