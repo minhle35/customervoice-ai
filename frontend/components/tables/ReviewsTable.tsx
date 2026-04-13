@@ -123,7 +123,7 @@ export function ReviewsTable({ reviews, isLoading }: ReviewsTableProps) {
                     <PlatformIcon platform={review.platform} />
                   </td>
                   <td className="px-4 py-3 max-w-xs">
-                    <p className="text-slate-300 line-clamp-2 text-xs leading-relaxed">{review.content}</p>
+                    <p className="text-slate-300 text-xs leading-relaxed max-h-24 overflow-y-auto pr-1">{review.content}</p>
                     {review.topics && review.topics.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {review.topics.slice(0, 3).map((topic) => (
