@@ -4,21 +4,10 @@ resource "aws_db_subnet_group" "main" {
   tags       = { Name = "${var.app_name}-db-subnet-group" }
 }
 
-# Enable pgvector via custom parameter group
-resource "aws_db_parameter_group" "pgvector" {
-  name   = "${var.app_name}-pgvector"
-  family = "postgres16"
-
-  parameter {
-    name  = "shared_preload_libraries"
-    value = "vector"
-  }
-}
-
 resource "aws_db_instance" "main" {
   identifier     = "${var.app_name}-db"
   engine         = "postgres"
-  engine_version = "16.3"
+  engine_version = "16"
   instance_class = "db.t3.micro"
 
   allocated_storage     = 20
@@ -30,7 +19,8 @@ resource "aws_db_instance" "main" {
 
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds.id]
-  parameter_group_name   = aws_db_parameter_group.pgvector.name
+  # pgvector is installed via: CREATE EXTENSION IF NOT EXISTS vector;
+  # run by alembic migration on first deploy — no custom parameter group needed
 
   # No public access — only reachable from inside the VPC
   publicly_accessible = false

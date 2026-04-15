@@ -9,3 +9,4 @@ docs/
 # Ignore Terraform state files and generated files
 *.tfstate
 settings/*
+.terraform/
