@@ -5,3 +5,7 @@ __pycache__/
 *.pyd
 
 docs/
+
+# Ignore Terraform state files and generated files
+*.tfstate
+settings/*
