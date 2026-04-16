@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 
 from app.api import routes_chat, routes_insights, routes_integrations, routes_reviews
 from app.config import get_settings
-from app.database.database import init_db
+from app.database import init_db
 from app.logger import configure_logging, get_logger
 
 configure_logging(get_settings())

@@ -4,7 +4,7 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query, status
-from app.database.database import SessionDep
+from app.database import SessionDep
 
 from app.models.review import Platform
 from app.schemas.review_schema import ReviewListOut, ReviewOut
