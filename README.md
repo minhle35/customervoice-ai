@@ -1,17 +1,15 @@
 # CustomerVoice AI
 
-An end-to-end AI application that aggregates customer reviews from Google Maps, Reddit, and Facebook, enriches them with LLM-powered analysis, and surfaces actionable insights through a real-time dashboard and RAG-based AI assistant.
+An end-to-end AI application that aggregates customer reviews from Google Maps, Reddit(future features), and Facebook(future features), enriches them with LLM-powered analysis, and surfaces actionable insights through a real-time dashboard and RAG-based AI assistant.
 
-Built as a personal R&D project to demonstrate production AI engineering practices — from data ingestion pipelines to agentic workflows and vector similarity search.
-
-**Live demo:** [project-5y6ee.vercel.app](https://project-5y6ee.vercel.app/dashboard)
+Built as a personal R&D project to learn and demonstrate production AI engineering practices — from data ingestion pipelines to agentic workflows and vector similarity search.
 
 ---
 
 ## What It Does
 
 1. **Ingests** reviews from Google Maps (via SerpAPI) into PostgreSQL — deduplicated, cleaned, and normalised
-2. **Enriches** each review with LLM-based sentiment classification and topic extraction (Llama 3.3 70B via OpenRouter)
+2. **Enriches** each review with LLM-based sentiment classification and topic extraction (Google Gemini 2.0 Flash via OpenRouter)
 3. **Embeds** reviews using a local multilingual sentence-transformer model, stored in pgvector with an HNSW index
 4. **Retrieves** relevant reviews semantically for any natural language query — cosine similarity search + cross-encoder re-ranking
 5. **Answers** business questions grounded in real review data via a RAG pipeline with citation support
@@ -24,7 +22,7 @@ Built as a personal R&D project to demonstrate production AI engineering practic
 ### Large Language Models & Prompt Engineering
 - Combined sentiment classification + topic extraction in a single LLM call using structured prompt design
 - Prompt-based JSON extraction with regex fallback for handling unstructured model output — avoids `response_format` lock-in across providers
-- OpenAI-compatible client (OpenRouter) enabling model-agnostic swap between Llama 3.3, Claude, GPT-4o
+- OpenAI-compatible client (OpenRouter) enabling model-agnostic swap between Gemini, Claude, GPT-4o, Llama
 
 ### RAG — Retrieval-Augmented Generation
 - Vector embeddings generated locally using `intfloat/multilingual-e5-base` (sentence-transformers, 768 dims) — multilingual, Vietnamese-capable, zero API cost
@@ -77,7 +75,7 @@ Google Maps (SerpAPI)
         ▼
 Celery Worker (async)
   ├── clean_review_text()
-  ├── analyze_sentiment_and_topics()  ← Llama 3.3 70B via OpenRouter
+  ├── analyze_sentiment_and_topics()  ← Google Gemini 2.0 Flash via OpenRouter
   ├── generate_embedding()            ← sentence-transformers (local, free)
   └── upsert → PostgreSQL + pgvector
         │
@@ -100,7 +98,7 @@ Next.js Dashboard
 
 | Layer | Technology |
 |---|---|
-| **LLM** | Llama 3.3 70B (OpenRouter), LangChain LCEL |
+| **LLM** | Google Gemini 2.0 Flash (via OpenRouter), LangChain LCEL |
 | **Embeddings** | `intfloat/multilingual-e5-base` (sentence-transformers, local) |
 | **Vector DB** | PostgreSQL + pgvector, HNSW index |
 | **Re-ranking** | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
@@ -150,8 +148,11 @@ customervoice-ai/
 
 ## Key Design Decisions
 
+**Why Google Gemini 2.0 Flash via OpenRouter?**
+Gemini 2.0 Flash offers a strong balance of speed, cost, and instruction-following quality for structured JSON extraction tasks (sentiment + topic). Accessing it through OpenRouter keeps the integration provider-agnostic — swapping to Claude or GPT-4o requires changing one config value, not rewriting API clients. Gemini 2.0 Flash also has full system prompt support, which is required for the structured output prompts used in this pipeline.
+
 **Why local embeddings instead of OpenAI?**
-`intfloat/multilingual-e5-base` is free, runs locally, and handles Vietnamese natively. OpenAI's `text-embedding-3-small` costs money per review and has weaker multilingual performance. Switching reduced inference cost to $0 while improving retrieval quality for Vietnamese text.
+`intfloat/multilingual-e5-base` runs locally (zero API cost), produces 768-dimensional vectors, and handles Vietnamese natively — critical for a review dataset that mixes English and Vietnamese. OpenAI's `text-embedding-3-small` charges per token and has weaker multilingual performance on Southeast Asian languages. The model requires `query:` / `passage:` prefix convention to distinguish retrieval queries from indexed documents, which is a deliberate design detail that improves recall quality.
 
 **Why retrieve-20 then re-rank to 5?**
 HNSW is fast but approximate — it finds vectors that are close in embedding space, not necessarily the most semantically relevant to the query. The cross-encoder reads query and document together (slower, more accurate). Retrieving 20 cheap candidates then re-ranking to 5 precise ones is the industry-standard two-stage retrieval pattern.
