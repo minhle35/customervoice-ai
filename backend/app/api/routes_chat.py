@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.database.database import SessionDep
+from app.database import SessionDep
 from app.logger import get_logger
 from app.schemas.insight_schema import ChatHistoryMessage, ChatRequest, ChatResponse
 from app.services.chat_service import ChatService
@@ -14,7 +14,11 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
-@router.get("/{business_id}/history", response_model=list[ChatHistoryMessage], summary="GET /api/chat/{business_id}/history")
+@router.get(
+    "/{business_id}/history",
+    response_model=list[ChatHistoryMessage],
+    summary="GET /api/chat/{business_id}/history",
+)
 def get_chat_history(business_id: str, db: SessionDep) -> list[ChatHistoryMessage]:
     """Return persisted chat history for a business, oldest-first."""
     messages = ChatService(db).get_history(business_id)
@@ -56,7 +60,12 @@ def chat(request: ChatRequest, db: SessionDep) -> ChatResponse:
             business_id=request.business_id,
         )
     except Exception as exc:
-        logger.error("RAG pipeline error for business_id=%s: %s", request.business_id, exc, exc_info=True)
+        logger.error(
+            "RAG pipeline error for business_id=%s: %s",
+            request.business_id,
+            exc,
+            exc_info=True,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to generate an answer. Try again later.",
