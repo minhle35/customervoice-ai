@@ -1,6 +1,11 @@
 import type { ChatRequest, ChatResponse, Review, ReviewListResponse } from '@/types'
 
-const BASE_URL = '/api'
+// When NEXT_PUBLIC_API_URL is set (Vercel), call the backend directly from the
+// browser — avoids Vercel server-side proxy DNS issues. Falls back to /api for
+// local dev where next.config.js rewrites handle the proxy.
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+  ? `${process.env.NEXT_PUBLIC_API_URL}/api`
+  : '/api'
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
