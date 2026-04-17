@@ -63,6 +63,7 @@ resource "aws_ecs_task_definition" "backend" {
       { name = "TRANSFORMERS_CACHE",      value = "/app/.cache/transformers" },
       { name = "HF_HOME",                 value = "/app/.cache/huggingface" },
       { name = "CELERY__RESULT_BACKEND",  value = "redis://${aws_elasticache_cluster.main.cache_nodes[0].address}:6379/1" },
+      { name = "ALLOWED_ORIGINS", value = "[\"https://project-5y6ee.vercel.app\",\"http://localhost:3000\"]" },
     ]
 
     logConfiguration = {
