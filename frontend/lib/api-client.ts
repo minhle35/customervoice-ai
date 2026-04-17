@@ -17,6 +17,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
       if (Array.isArray(detail)) throw new Error(detail.map((e: { msg: string }) => e.msg).join(', '))
       throw new Error(text)
     } catch (e) {
+      if (e instanceof SyntaxError) throw new Error(`Request failed (${res.status} ${res.statusText})`)
       if (e instanceof Error) throw e
     }
   }
