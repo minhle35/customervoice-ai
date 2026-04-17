@@ -26,6 +26,10 @@ resource "aws_ecs_task_definition" "backend" {
   cpu                      = 512   # 0.5 vCPU
   memory                   = 1024  # 1GB
 
+  ephemeral_storage {
+    size_in_gib = 50
+  }
+
   execution_role_arn = aws_iam_role.ecs_execution.arn
   task_role_arn      = aws_iam_role.ecs_task.arn
 
@@ -53,6 +57,11 @@ resource "aws_ecs_task_definition" "backend" {
       { name = "DB__NAME",       value = "customer_voice_ai" },
       { name = "DB__USERNAME",   value = "postgres" },
       { name = "CELERY__BROKER_URL",      value = "redis://${aws_elasticache_cluster.main.cache_nodes[0].address}:6379/0" },
+      # Redirect PyTorch cache away from /tmp (limited) to /app which has ephemeral storage
+      { name = "TORCHINDUCTOR_CACHE_DIR", value = "/app/.cache/torchinductor" },
+      { name = "TORCH_HOME",              value = "/app/.cache/torch" },
+      { name = "TRANSFORMERS_CACHE",      value = "/app/.cache/transformers" },
+      { name = "HF_HOME",                 value = "/app/.cache/huggingface" },
       { name = "CELERY__RESULT_BACKEND",  value = "redis://${aws_elasticache_cluster.main.cache_nodes[0].address}:6379/1" },
     ]
 
