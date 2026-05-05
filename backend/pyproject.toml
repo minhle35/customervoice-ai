@@ -6,11 +6,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     # Web framework
-    "fastapi==0.115.0",
-    "uvicorn[standard]==0.30.6",
+    "fastapi>=0.115.12",
+    "uvicorn[standard]>=0.30.6",
     # Pydantic & settings
-    "pydantic==2.9.2",
-    "pydantic-settings==2.5.2",
+    "pydantic>=2.9.2",
+    "pydantic-settings>=2.5.2",
     # Database
     "sqlalchemy==2.0.35",
     "psycopg2-binary==2.9.9",
@@ -25,13 +25,13 @@ dependencies = [
     "torch",
     "sentence-transformers>=3.0.0",
     # HTTP client
-    "httpx==0.27.2",
+    "httpx>=0.28.1",
     # Ingestion + cleaning
     "praw>=7.7.1",
     "beautifulsoup4>=4.12",
     "langdetect>=1.0.9",
     # Utilities
-    "python-dotenv==1.0.1",
+    "python-dotenv>=1.1.0",
     "python-multipart==0.0.12",
     "langchain>=0.3.28",
     "langchain-openai>=0.2.2",

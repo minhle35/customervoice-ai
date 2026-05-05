@@ -24,25 +24,33 @@ SERPAPI = "https://serpapi.com/search.json"
 
 
 def check_key(api_key: str) -> bool:
-    resp = httpx.get("https://serpapi.com/account", params={"api_key": api_key}, timeout=10.0)
+    resp = httpx.get(
+        "https://serpapi.com/account", params={"api_key": api_key}, timeout=10.0
+    )
     data = resp.json()
     if "error" in data:
         print(f"Key rejected: {data['error']}")
         return False
-    print(f"Key valid | Plan: {data.get('plan_name')} | Searches left: {data.get('searches_left', '?')}")
+    print(
+        f"Key valid | Plan: {data.get('plan_name')} | Searches left: {data.get('searches_left', '?')}"
+    )
     return True
 
 
 def find_data_id(api_key: str, query: str, country: str = "us") -> str | None:
     """Search Google Maps for a business and return its data_id."""
     print(f"\nSearching Google Maps for: {query!r} (country: {country})")
-    resp = httpx.get(SERPAPI, params={
-        "engine": "google_maps",
-        "q": query,
-        "api_key": api_key,
-        "hl": "en",
-        "gl": country,
-    }, timeout=15.0)
+    resp = httpx.get(
+        SERPAPI,
+        params={
+            "engine": "google_maps",
+            "q": query,
+            "api_key": api_key,
+            "hl": "en",
+            "gl": country,
+        },
+        timeout=15.0,
+    )
     payload = resp.json()
 
     if "error" in payload:
@@ -70,13 +78,17 @@ def find_data_id(api_key: str, query: str, country: str = "us") -> str | None:
 def fetch_reviews(api_key: str, data_id: str) -> None:
     """Fetch reviews using a valid data_id."""
     print(f"\nFetching reviews (data_id: {data_id})")
-    resp = httpx.get(SERPAPI, params={
-        "engine": "google_maps_reviews",
-        "data_id": data_id,
-        "api_key": api_key,
-        "hl": "en",
-        "sort_by": "newestFirst",
-    }, timeout=15.0)
+    resp = httpx.get(
+        SERPAPI,
+        params={
+            "engine": "google_maps_reviews",
+            "data_id": data_id,
+            "api_key": api_key,
+            "hl": "en",
+            "sort_by": "newestFirst",
+        },
+        timeout=15.0,
+    )
     payload = resp.json()
 
     if "error" in payload:
@@ -88,7 +100,9 @@ def fetch_reviews(api_key: str, data_id: str) -> None:
     for r in reviews[:3]:
         user = r.get("user", {})
         name = user.get("name") if isinstance(user, dict) else str(user)
-        print(f"  [{r.get('rating')}★] {name or 'n/a'}: {str(r.get('snippet') or r.get('text') or '')[:100]}")
+        print(
+            f"  [{r.get('rating')}★] {name or 'n/a'}: {str(r.get('snippet') or r.get('text') or '')[:100]}"
+        )
 
 
 def main() -> None:
@@ -103,7 +117,9 @@ def main() -> None:
 
     if len(sys.argv) < 2:
         print("\nPass a business name to also test review fetching:")
-        print('  uv run python scripts/check_serpapi_key.py "business name" [country_code]')
+        print(
+            '  uv run python scripts/check_serpapi_key.py "business name" [country_code]'
+        )
         return
 
     query = sys.argv[1]
@@ -111,7 +127,7 @@ def main() -> None:
     data_id = find_data_id(api_key, query, country)
     if data_id:
         fetch_reviews(api_key, data_id)
-        print(f"\nUse this data_id in your ingestion params:")
+        print("\nUse this data_id in your ingestion params:")
         print(f'  "params": {{"data_id": "{data_id}", "place_name": "{query}"}}')
 
 
