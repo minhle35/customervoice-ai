@@ -64,8 +64,11 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(
-        _request: Request, exc: Exception
+        request: Request, exc: Exception
     ) -> JSONResponse:
+        logger.exception(
+            "Unhandled exception on %s %s", request.method, request.url.path
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "Internal server error"},
