@@ -6,17 +6,11 @@
 flowchart TD
     subgraph Clients["Clients"]
         Browser["Browser\nNext.js :3000"]
-        ClaudeDesktop["Claude Desktop\n(MCP host)"]
-    end
-
-    subgraph MCP["MCP Layer (stdio / SSE)"]
-        MCPServer["mcp_server/server.py\nFastMCP\n6 tools exposed"]
     end
 
     subgraph API["Backend API  FastAPI :8000"]
         RouteChat["POST /api/chat\nDirect RAG"]
         RouteAgent["POST /api/agent/ask\nLangGraph agent"]
-        RouteTools["POST /api/agent/tools/*\nDirect tool endpoints"]
         RouteIngest["POST /api/integrations/*\nIngestion trigger"]
         RouteReviews["GET /api/reviews\nFiltered review list"]
         RouteInsights["GET /api/insights\nAggregated stats"]
@@ -77,9 +71,6 @@ flowchart TD
     end
 
     Browser -->|"POST /api/chat\nGET /api/reviews\nGET /api/insights"| API
-    ClaudeDesktop -->|stdio JSON| MCPServer
-    MCPServer -->|HTTP| RouteTools
-    MCPServer -->|HTTP| RouteAgent
 
     RouteChat --> RAGPipeline
     RouteAgent --> AgentGraph
@@ -131,43 +122,11 @@ sequenceDiagram
 
 ---
 
-## MCP Tool Call Flow
-
-```mermaid
-sequenceDiagram
-    participant Claude as Claude Desktop
-    participant MCP as mcp_server/server.py<br/>(FastMCP stdio)
-    participant API as FastAPI :8000
-    participant Graph as LangGraph
-    participant PG as PostgreSQL
-
-    Claude->>MCP: initialize (list tools)
-    MCP-->>Claude: 7 tool schemas (JSON)
-
-    Claude->>MCP: call list_businesses()
-    MCP->>API: GET /api/reviews/businesses
-    API->>PG: SELECT DISTINCT business_id
-    PG-->>API: [{business_id, business_name}]
-    API-->>MCP: JSON list
-    MCP-->>Claude: "Available businesses: ..."
-
-    Claude->>MCP: call ask_agent(question, business_id)
-    MCP->>API: POST /api/agent/ask
-    API->>Graph: invoke(AgentState)
-    Graph->>Graph: intent_classifier → "rag"
-    Graph->>Graph: rag_node → RAG pipeline
-    Graph-->>API: AIMessage with cited answer
-    API-->>MCP: {answer, thread_id}
-    MCP-->>Claude: answer string
-```
-
----
-
 ## Ingestion + ETL Flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as Frontend / MCP
+    participant UI as Frontend
     participant API as FastAPI
     participant Redis as Redis Queue
     participant Worker as Celery Worker

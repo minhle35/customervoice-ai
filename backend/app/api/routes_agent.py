@@ -5,19 +5,8 @@ Endpoints:
   POST /api/agent/{thread_id}/approve   — resume a paused ingestion (approved)
   POST /api/agent/{thread_id}/reject    — resume a paused ingestion (rejected)
 
-  # Direct tool endpoints (used by the MCP server and for testing)
-  POST /api/agent/tools/search          — call search_reviews tool directly
-  GET  /api/agent/tools/sentiment-summary — call get_sentiment_summary tool directly
-  POST /api/agent/tools/ingest          — call trigger_ingestion tool directly
-
 The graph instance is built per-request (db is request-scoped). MemorySaver
 holds in-process state — swap for PostgresSaver for cross-restart persistence.
-
-Networking layer:
-  The MCP server calls these endpoints over HTTP, demonstrating:
-    - REST API design (networking)
-    - Request/response schemas (Pydantic v2)
-    - Separation of MCP server process from FastAPI process
 """
 
 from __future__ import annotations
