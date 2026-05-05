@@ -5,9 +5,12 @@ frontend/.next/
 *.pyo
 *.pyd
 
-docs/
+
 
 # Ignore Terraform state files and generated files
 *.tfstate
 settings/*
 .terraform/
+
+# .DS_Store files (macOS)
+.DS_Store

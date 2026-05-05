@@ -47,6 +47,12 @@ RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
 # Activate venv
 ENV PATH="/app/.venv/bin:$PATH"
 
+# HuggingFace cache — must exist and be owned by appuser before USER switch.
+# --no-create-home means /home/appuser never exists, so we redirect HF_HOME
+# to a path inside /app that we control.
+ENV HF_HOME=/app/.cache/huggingface
+RUN mkdir -p /app/.cache/huggingface
+
 # Run as non-root user — limits blast radius if the app is compromised
 RUN useradd --no-create-home --shell /bin/false appuser && \
     chown -R appuser:appuser /app

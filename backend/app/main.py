@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import routes_chat, routes_insights, routes_integrations, routes_reviews
+from app.api import routes_agent, routes_chat, routes_insights, routes_integrations, routes_reviews
 from app.config import get_settings
 from app.database import init_db
 from app.logger import configure_logging, get_logger
@@ -78,6 +78,7 @@ def create_app() -> FastAPI:
     app.include_router(routes_insights.router)
     app.include_router(routes_chat.router)
     app.include_router(routes_integrations.router)
+    app.include_router(routes_agent.router)
 
     # ---------------------------------------------------------------------------
     # Health check
