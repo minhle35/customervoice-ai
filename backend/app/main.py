@@ -16,10 +16,11 @@ logger = get_logger(__name__)
 
 _settings = get_settings()
 
-# Propagate LangSmith settings to os.environ so LangChain picks them up automatically
-os.environ.setdefault("LANGCHAIN_TRACING_V2", _settings.langchain_tracing_v2)
-os.environ.setdefault("LANGCHAIN_API_KEY", _settings.langchain_api_key)
-os.environ.setdefault("LANGCHAIN_PROJECT", _settings.langchain_project)
+# Propagate LangSmith settings to os.environ so the langsmith SDK picks them up
+os.environ.setdefault("LANGSMITH_TRACING", _settings.langsmith_tracing)
+os.environ.setdefault("LANGSMITH_ENDPOINT", _settings.langsmith_endpoint)
+os.environ.setdefault("LANGSMITH_API_KEY", _settings.langsmith_api_key)
+os.environ.setdefault("LANGSMITH_PROJECT", _settings.langsmith_project)
 
 
 @asynccontextmanager

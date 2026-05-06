@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from uuid import UUID
 
+from langsmith import traceable
 from sqlalchemy.orm import Session
 from app.config import get_settings
 from pipelines.rag.answer_generator import generate_answer
@@ -17,6 +18,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 
+@traceable(name="rag_pipeline", metadata={"pipeline": "two-stage-rag"})
 def run_rag_pipeline(
     db: Session,
     question: str,

@@ -105,10 +105,11 @@ class ServerSettings(BaseSettings):
     embedding_model: str = "intfloat/multilingual-e5-base"
     embedding_dimensions: int = 768
 
-    # LangSmith observability (set langchain_tracing_v2=true to enable)
-    langchain_tracing_v2: str = "false"
-    langchain_api_key: str = ""
-    langchain_project: str = "customervoice-ai"
+    # LangSmith observability
+    langsmith_tracing: str = "true"
+    langsmith_endpoint: str = "https://api.smith.langchain.com"
+    langsmith_api_key: str = ""
+    langsmith_project: str = "customervoice-ai"
 
     # External APIs
     google_reviews_api_key: str = ""
