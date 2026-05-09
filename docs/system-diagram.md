@@ -11,6 +11,7 @@ flowchart TD
     subgraph API["Backend API  FastAPI :8000"]
         RouteChat["POST /api/chat\nDirect RAG"]
         RouteAgent["POST /api/agent/ask\nLangGraph agent"]
+        RouteAgentHITL["POST /api/agent/{thread_id}/approve\nPOST /api/agent/{thread_id}/reject\nHITL resume"]
         RouteIngest["POST /api/integrations/*\nIngestion trigger"]
         RouteReviews["GET /api/reviews\nFiltered review list"]
         RouteInsights["GET /api/insights\nAggregated stats"]
@@ -41,7 +42,7 @@ flowchart TD
         CeleryApp["celery_app\nworker process"]
         Fetcher["pipeline_runner\n_fetch_reviews()"]
         Cleaner["clean_reviews\nnormalise + dedup"]
-        Sentiment["sentiment_analysis\nHuggingFace transformers"]
+        Sentiment["sentiment_analysis\nOpenRouter LLM\n(openai client)"]
         EmbedGen["generate_embeddings\nsentence-transformers"]
         DBWriter["review_service\nSQLAlchemy upsert"]
         CeleryApp --> Fetcher --> Cleaner --> Sentiment --> EmbedGen --> DBWriter
@@ -60,10 +61,11 @@ flowchart TD
         ReviewsTable --- EmbeddingsTable
     end
 
-    subgraph Observability["Observability (partial)"]
-        LangSmith["LangSmith\nlangchain_tracing_v2\n(disabled — no key)"]
+    subgraph Observability["Observability"]
+        LangSmith["LangSmith\nLANGSMITH_TRACING=true\n@traceable on run_agent + rag_pipeline"]
         Langfuse["Langfuse\n(installed, not wired)"]
-        MLflow["MLflow\n(installed, not wired)"]
+        MLflow["MLflow\n(evaluation runs)"]
+        RAGAS["RAGAS\nFaithfulness, AnswerRelevancy\nContextPrecision, ContextRecall"]
     end
 
     subgraph LLM["LLM  OpenRouter"]
@@ -74,6 +76,7 @@ flowchart TD
 
     RouteChat --> RAGPipeline
     RouteAgent --> AgentGraph
+    RouteAgentHITL -->|Command resume| AgentGraph
     RAGNode --> RAGPipeline
     InsightNode --> Storage
     IngestionNode -->|"Celery task\n.delay()"| CeleryWorkerQ
@@ -83,13 +86,15 @@ flowchart TD
     Fetcher --> Reddit
     Fetcher --> Facebook
 
-    RAGPipeline --> Storage
+    Storage -->|read: reviews + embeddings| RAGPipeline
     DBWriter --> Storage
     LLMAnswer --> LLM
     IntentNode --> LLM
     InsightNode --> LLM
 
     AgentGraph -.->|traces| LangSmith
+    RAGPipeline -.->|traces| LangSmith
+    MLflow --- RAGAS
 ```
 
 ---
@@ -106,7 +111,7 @@ sequenceDiagram
     participant CTX as ContextBuilder
     participant LLM as OpenRouter<br/>(Gemini 2.0 Flash)
 
-    User->>API: POST /api/chat {question, business_id}
+    User->>API: POST /api/chat {messages[], business_id}
     API->>Embed: encode("query: " + question)
     Embed-->>API: 768-dim float vector
     API->>PG: SELECT ... ORDER BY embedding <=> query_vec LIMIT 20

@@ -35,6 +35,7 @@ from agents.state import AgentState
 from app.config import ServerSettings
 
 from langchain_core.messages import HumanMessage
+from langsmith import traceable
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command
@@ -118,6 +119,7 @@ def build_graph(db: Session, settings: ServerSettings):
 # ---------------------------------------------------------------------------
 
 
+@traceable(name="run_agent")
 def run_agent(
     graph,
     question: str,
@@ -136,6 +138,8 @@ def run_agent(
         "business_id": business_id,
         "thread_id": thread_id,
         "intent": None,
+        "intent_confidence": None,
+        "intent_reasoning": None,
         "pending_ingestion": None,
         "approved": None,
     }

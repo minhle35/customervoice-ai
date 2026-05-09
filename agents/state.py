@@ -34,6 +34,8 @@ class AgentState(TypedDict):
 
     # Set by the intent classifier node; drives conditional edges
     intent: Literal["rag", "insight", "ingestion", "clarification"] | None
+    intent_confidence: float | None
+    intent_reasoning: str | None
 
     # ------------------------------------------------------------------ #
     # Human-in-the-loop handshake for ingestion                           #

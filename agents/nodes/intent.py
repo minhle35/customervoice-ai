@@ -120,7 +120,11 @@ def intent_node(state: AgentState, settings: ServerSettings) -> dict:
     ]
     result: IntentClassification = classifier.invoke(messages)
 
-    return {"intent": result.intent}
+    return {
+        "intent": result.intent,
+        "intent_confidence": result.confidence,
+        "intent_reasoning": result.reasoning,
+    }
 
 
 # ---------------------------------------------------------------------------
