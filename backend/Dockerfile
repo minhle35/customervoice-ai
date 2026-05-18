@@ -19,9 +19,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies using uv
+# Install dependencies using uv into /opt/venv (outside /app bind mount)
 ENV UV_LINK_MODE=copy
 ENV UV_CACHE_DIR=/opt/uv-cache/
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 
 RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
@@ -45,7 +46,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
     uv sync --locked
 
 # Activate venv
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/opt/venv/bin:$PATH"
 
 # HuggingFace cache — must exist and be owned by appuser before USER switch.
 # --no-create-home means /home/appuser never exists, so we redirect HF_HOME
@@ -55,7 +56,7 @@ RUN mkdir -p /app/.cache/huggingface
 
 # Run as non-root user — limits blast radius if the app is compromised
 RUN useradd --no-create-home --shell /bin/false appuser && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app /opt/venv
 USER appuser
 
 # Healthcheck
