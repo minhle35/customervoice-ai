@@ -32,7 +32,6 @@ services:
       - ./workers:/app/workers
       - ./pipelines:/app/pipelines
       - ./agents:/app/agents
-      - backend_venv:/app/.venv
       - hf_cache:/app/.cache/huggingface
 
   worker:
@@ -49,10 +48,8 @@ services:
       - ./workers:/app/workers
       - ./pipelines:/app/pipelines
       - ./agents:/app/agents
-      - backend_venv:/app/.venv
       - hf_cache:/app/.cache/huggingface
 
 volumes:
   db_data:
-  backend_venv:
   hf_cache:
