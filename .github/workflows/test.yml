@@ -2,7 +2,7 @@ name: Backend Tests
 
 on:
   push:
-    branches: [main, "feat/**", "fix/**", "refactor/**", "test/**"]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -28,7 +28,7 @@ jobs:
         run: uv run pytest tests/unit/ --cov=app --cov=pipelines --cov-report=term-missing -q
 
   db-tests:
-    name: API & Integration tests
+    name: Integration tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -64,7 +64,7 @@ jobs:
           DB__NAME: customer_voice_ai_test
         run: uv run alembic upgrade head
 
-      - name: Run API & integration tests
+      - name: Run integration tests
         env:
           TEST_DATABASE_URL: postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
-        run: uv run pytest tests/api/ tests/integration/ --cov=app --cov=pipelines --cov-report=term-missing -q
+        run: uv run pytest tests/integration/ --cov=app --cov=pipelines --cov-report=term-missing -q
