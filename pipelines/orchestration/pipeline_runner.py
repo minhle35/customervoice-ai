@@ -9,14 +9,12 @@ from app.config import get_settings
 from app.database.database import (
     get_session,
 )  # Since we call from Celery - no FastAPI context, need explicit context manager for DB sessions
+from app.integrations.registry import get_handler
 from app.models.review import Platform, Review
 from app.schemas.review_schema import ReviewCreate, ReviewUpdate
 from app.services.embedding_service import EmbeddingService
 from app.services.review_service import ReviewService
 from pipelines.embeddings.generate_embeddings import generate_embedding
-from pipelines.ingestion.facebook_ingestion import fetch_facebook_reviews
-from pipelines.ingestion.google_reviews_ingestion import fetch_google_reviews
-from pipelines.ingestion.reddit_ingestion import fetch_reddit_reviews
 from pipelines.processing.clean_reviews import clean_review_text
 from pipelines.processing.sentiment_analysis import analyze_sentiment_and_topics
 
@@ -26,6 +24,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Celery progress emitter
 # ---------------------------------------------------------------------------
+
 
 def _emit(task, stage: str, **meta) -> None:
     """Push a PROGRESS state to Celery result backend.
@@ -48,25 +47,20 @@ def _emit(task, stage: str, **meta) -> None:
 # Phase 1 — fetch from external platform
 # ---------------------------------------------------------------------------
 
+
 def _fetch_reviews(
     platform_value: Platform, business_id: str, params: dict, task
 ) -> list[ReviewCreate]:
     """Call the appropriate ingestion adapter and return raw ReviewCreate objects."""
     _emit(task, "fetching")
-
-    if platform_value == Platform.google:
-        return fetch_google_reviews(business_id, params)
-    elif platform_value == Platform.reddit:
-        return fetch_reddit_reviews(business_id, params)
-    elif platform_value == Platform.facebook:
-        return fetch_facebook_reviews(business_id, params)
-    else:
-        raise ValueError(f"Unsupported platform: {platform_value}")
+    handler = get_handler(platform_value.value)
+    return handler.fetch_reviews(business_id, params)
 
 
 # ---------------------------------------------------------------------------
 # Phase 2 — persist all reviews to DB before any LLM call
 # ---------------------------------------------------------------------------
+
 
 def _save_reviews(
     review_service: ReviewService, reviews: list[ReviewCreate], task
@@ -95,6 +89,7 @@ def _save_reviews(
 # ---------------------------------------------------------------------------
 # Phase 3 — sentiment analysis + embedding (LLM calls, rate-limit-sensitive)
 # ---------------------------------------------------------------------------
+
 
 def _process_single_review(
     review_service: ReviewService,
@@ -190,6 +185,7 @@ def _process_reviews(
 # ---------------------------------------------------------------------------
 # Public entry points (called by Celery tasks)
 # ---------------------------------------------------------------------------
+
 
 def ingest(platform: str | Platform, business_id: str, params: dict, task=None) -> dict:
     """Full ingestion pipeline: fetch → save all → process all.
