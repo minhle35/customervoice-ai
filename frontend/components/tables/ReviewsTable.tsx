@@ -96,10 +96,11 @@ export function ReviewsTable({ reviews, isLoading }: ReviewsTableProps) {
           <thead>
             <tr className="border-b border-slate-800 bg-slate-900/80">
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Platform</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Business</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Review</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Rating</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Sentiment</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Review Date</th>
             </tr>
           </thead>
           <tbody>
@@ -107,7 +108,7 @@ export function ReviewsTable({ reviews, isLoading }: ReviewsTableProps) {
               Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
             ) : reviews.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-slate-500">
+                <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
                   <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">No reviews yet</p>
                   <p className="text-xs mt-1">Connect a data source to start collecting reviews</p>
@@ -121,6 +122,9 @@ export function ReviewsTable({ reviews, isLoading }: ReviewsTableProps) {
                 >
                   <td className="px-4 py-3 whitespace-nowrap">
                     <PlatformIcon platform={review.platform} />
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className="text-xs text-slate-300">{review.business_name ?? review.business_id}</span>
                   </td>
                   <td className="px-4 py-3 max-w-xs">
                     <p className="text-slate-300 text-xs leading-relaxed max-h-24 overflow-y-auto pr-1">{review.content}</p>

@@ -25,19 +25,23 @@ def _stable_id(*parts: str) -> str:
 
 
 def _parse_datetime(value: Any) -> datetime | None:
+    """Verify if ISO formatted timestamp"""
     if value is None:
         return None
     if isinstance(value, (int, float)):
         return datetime.fromtimestamp(value, tz=timezone.utc)
     if isinstance(value, str):
+        # fromisoformat only accepts the Z suffix in Python 3.11+; normalise it
         try:
-            return datetime.fromisoformat(value)
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
         except ValueError:
             return None
     return None
 
 
-def _parse_reviews_from_page(payload: dict, business_id: str, place_name: str | None) -> list[ReviewCreate]:
+def _parse_reviews_from_page(
+    payload: dict, business_id: str, place_name: str | None
+) -> list[ReviewCreate]:
     """Parse one page of SerpAPI response into ReviewCreate objects."""
     reviews = []
     for item in payload.get("reviews", []):
@@ -54,7 +58,10 @@ def _parse_reviews_from_page(payload: dict, business_id: str, place_name: str | 
 
         rating = item.get("rating")
         published_at = _parse_datetime(
-            item.get("timestamp") or item.get("time") or item.get("published_at")
+            item.get("iso_date")
+            or item.get("iso_date_of_last_edit")
+            or item.get("timestamp")
+            or item.get("published_at")
         )
         platform_id = item.get("review_id") or item.get("id")
         if not platform_id:
@@ -120,7 +127,10 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
 
             logger.info(
                 "Fetching Google reviews page %d for business_id=%s (collected=%d, max=%d)",
-                page, business_id, len(all_reviews), max_reviews,
+                page,
+                business_id,
+                len(all_reviews),
+                max_reviews,
             )
 
             response = client.get(SERPAPI_ENDPOINT, params=query_params)
@@ -143,8 +153,8 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
                 logger.info("Reached max_reviews=%d, stopping pagination", max_reviews)
                 break
 
-            next_page_token = (
-                payload.get("serpapi_pagination", {}).get("next_page_token")
+            next_page_token = payload.get("serpapi_pagination", {}).get(
+                "next_page_token"
             )
             if not next_page_token:
                 logger.info("No more pages available after page %d", page)
@@ -155,6 +165,8 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
 
     logger.info(
         "Fetched %d total reviews across %d page(s) for business_id=%s",
-        len(all_reviews), page, business_id,
+        len(all_reviews),
+        page,
+        business_id,
     )
     return all_reviews

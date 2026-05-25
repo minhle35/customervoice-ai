@@ -124,9 +124,9 @@ def _mock_client(payload: dict):
 class TestFetchGoogleReviews:
     def test_raises_when_no_api_key(self):
         with patch(
-            "pipelines.ingestion.google_reviews_ingestion.settings"
+            "pipelines.ingestion.google_reviews_ingestion.get_settings"
         ) as mock_settings:
-            mock_settings.google_reviews_api_key = None
+            mock_settings.return_value.google_reviews_api_key = None
             with pytest.raises(ValueError, match="GOOGLE_REVIEWS_API_KEY"):
                 fetch_google_reviews("biz-1", {})
 
@@ -134,14 +134,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client(SERPAPI_RESPONSE)
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {"place_name": "The Grand Hotel"})
 
         assert len(reviews) == 2
@@ -150,14 +150,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client(SERPAPI_RESPONSE)
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {"place_name": "The Grand Hotel"})
 
         r = reviews[0]
@@ -185,14 +185,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client(payload)
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {})
 
         assert reviews[0].author == "Charlie"
@@ -209,14 +209,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client(payload)
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {})
 
         assert reviews[0].content == "Nice"
@@ -237,14 +237,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client(payload)
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {})
 
         assert len(reviews) == 1
@@ -259,14 +259,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client(payload)
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {})
 
         assert len(reviews) == 1
@@ -286,14 +286,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client(payload)
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {})
 
         assert reviews[0].rating is None
@@ -302,14 +302,14 @@ class TestFetchGoogleReviews:
         cm, _ = _mock_client({"reviews": []})
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "test-key"
+            mock_settings.return_value.google_reviews_api_key = "test-key"
             reviews = fetch_google_reviews("biz-1", {})
 
         assert reviews == []
@@ -318,14 +318,14 @@ class TestFetchGoogleReviews:
         cm, mock_client = _mock_client({"reviews": []})
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "my-secret-key"
+            mock_settings.return_value.google_reviews_api_key = "my-secret-key"
             fetch_google_reviews("biz-1", {"data_id": "place-xyz"})
 
         call_kwargs = mock_client.get.call_args
@@ -349,13 +349,13 @@ class TestFetchGoogleReviews:
 
         with (
             patch(
-                "pipelines.ingestion.google_reviews_ingestion.settings"
+                "pipelines.ingestion.google_reviews_ingestion.get_settings"
             ) as mock_settings,
             patch(
                 "pipelines.ingestion.google_reviews_ingestion.httpx.Client",
                 return_value=cm,
             ),
         ):
-            mock_settings.google_reviews_api_key = "bad-key"
-            with pytest.raises(httpx.HTTPStatusError):
+            mock_settings.return_value.google_reviews_api_key = "bad-key"
+            with pytest.raises(RuntimeError):
                 fetch_google_reviews("biz-1", {})
