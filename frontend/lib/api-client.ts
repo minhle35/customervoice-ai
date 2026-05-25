@@ -79,7 +79,7 @@ export function searchPlaces(query: string, country: string): Promise<PlaceResul
 
 export function triggerIngestion(
   platform: string,
-  payload: { platform: string; business_id?: string; params: Record<string, string> }
+  payload: { platform: string; business_id?: string; params: Record<string, string | number> }
 ): Promise<{ status: string; task_id: string }> {
   return apiFetch<{ status: string; task_id: string }>(`/integrations/${platform}`, {
     method: 'POST',

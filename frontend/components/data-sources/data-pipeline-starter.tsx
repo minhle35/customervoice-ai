@@ -32,6 +32,7 @@ export function DataPipelineStarter({ onStarted }: Props) {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [results, setResults] = useState<PlaceResult[] | null>(null)
   const [selected, setSelected] = useState<PlaceResult | null>(null)
+  const [maxReviews, setMaxReviews] = useState(100)
   const [ingesting, setIngesting] = useState(false)
   const [ingestError, setIngestError] = useState<string | null>(null)
 
@@ -63,6 +64,7 @@ export function DataPipelineStarter({ onStarted }: Props) {
           data_id: selected.data_id,
           ...(selected.place_id ? { place_id: selected.place_id } : {}),
           place_name: selected.title,
+          max_reviews: maxReviews,
         },
       })
       onStarted(task_id)
@@ -193,6 +195,21 @@ export function DataPipelineStarter({ onStarted }: Props) {
               <p><span className="text-slate-500">Place ID (business_id):</span> <span className="font-mono text-slate-300">{selected.place_id}</span></p>
             )}
             <p><span className="text-slate-500">Data ID:</span> <span className="font-mono text-slate-300">{selected.data_id}</span></p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label htmlFor="max-reviews" className="text-xs text-slate-400 whitespace-nowrap">
+              Max reviews to fetch
+            </label>
+            <input
+              id="max-reviews"
+              type="number"
+              min={1}
+              max={500}
+              value={maxReviews}
+              onChange={(e) => setMaxReviews(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-24 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            />
           </div>
 
           {ingestError && (
