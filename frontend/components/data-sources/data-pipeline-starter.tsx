@@ -201,15 +201,31 @@ export function DataPipelineStarter({ onStarted }: Props) {
             <label htmlFor="max-reviews" className="text-xs text-slate-400 whitespace-nowrap">
               Max reviews to fetch
             </label>
-            <input
-              id="max-reviews"
-              type="number"
-              min={1}
-              max={500}
-              value={maxReviews}
-              onChange={(e) => setMaxReviews(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-24 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-            />
+            <div className="flex items-center rounded-lg border border-slate-700 bg-slate-800 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setMaxReviews((v) => Math.max(1, v - 10))}
+                className="px-2.5 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors text-sm select-none"
+              >
+                −
+              </button>
+              <input
+                id="max-reviews"
+                type="number"
+                min={1}
+                max={500}
+                value={maxReviews}
+                onChange={(e) => setMaxReviews(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-16 py-1.5 bg-transparent text-sm text-slate-200 text-center focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <button
+                type="button"
+                onClick={() => setMaxReviews((v) => Math.min(500, v + 10))}
+                className="px-2.5 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors text-sm select-none"
+              >
+                +
+              </button>
+            </div>
           </div>
 
           {ingestError && (
