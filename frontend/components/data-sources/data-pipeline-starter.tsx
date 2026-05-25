@@ -32,6 +32,7 @@ export function DataPipelineStarter({ onStarted }: Props) {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [results, setResults] = useState<PlaceResult[] | null>(null)
   const [selected, setSelected] = useState<PlaceResult | null>(null)
+  const [maxReviews, setMaxReviews] = useState(100)
   const [ingesting, setIngesting] = useState(false)
   const [ingestError, setIngestError] = useState<string | null>(null)
 
@@ -63,6 +64,7 @@ export function DataPipelineStarter({ onStarted }: Props) {
           data_id: selected.data_id,
           ...(selected.place_id ? { place_id: selected.place_id } : {}),
           place_name: selected.title,
+          max_reviews: maxReviews,
         },
       })
       onStarted(task_id)
@@ -193,6 +195,37 @@ export function DataPipelineStarter({ onStarted }: Props) {
               <p><span className="text-slate-500">Place ID (business_id):</span> <span className="font-mono text-slate-300">{selected.place_id}</span></p>
             )}
             <p><span className="text-slate-500">Data ID:</span> <span className="font-mono text-slate-300">{selected.data_id}</span></p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label htmlFor="max-reviews" className="text-xs text-slate-400 whitespace-nowrap">
+              Max reviews to fetch
+            </label>
+            <div className="flex items-center rounded-lg border border-slate-700 bg-slate-800 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setMaxReviews((v) => Math.max(1, v - 10))}
+                className="px-2.5 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors text-sm select-none"
+              >
+                −
+              </button>
+              <input
+                id="max-reviews"
+                type="number"
+                min={1}
+                max={500}
+                value={maxReviews}
+                onChange={(e) => setMaxReviews(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-16 py-1.5 bg-transparent text-sm text-slate-200 text-center focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <button
+                type="button"
+                onClick={() => setMaxReviews((v) => Math.min(500, v + 10))}
+                className="px-2.5 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors text-sm select-none"
+              >
+                +
+              </button>
+            </div>
           </div>
 
           {ingestError && (

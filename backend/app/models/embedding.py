@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from app.models.review import Review
 from pgvector.sqlalchemy import Vector
+
+if TYPE_CHECKING:
+    from app.models.review import Review
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -12,7 +17,7 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# intfloat/multilingual-e5-base produces 768-dimension vectors
+# 768-dimension vectors
 EMBEDDING_DIMENSIONS = 768
 
 
@@ -32,10 +37,6 @@ class ReviewEmbedding(Base):
     embedding: Mapped[list[float]] = mapped_column(
         Vector(EMBEDDING_DIMENSIONS), nullable=False
     )
-    # model: Mapped[str] = mapped_column(
-    #     String(128), nullable=False, default="intfloat/multilingual-e5-base"
-    # )
-
     model: Mapped[str] = mapped_column(
         String(128), nullable=False, default=settings.embedding_model
     )
@@ -45,7 +46,7 @@ class ReviewEmbedding(Base):
     )
 
     # Relationships
-    review: Mapped[Review] = relationship("Review", back_populates="embedding")
+    review: Mapped["Review"] = relationship("Review", back_populates="embedding")
 
     def __repr__(self) -> str:
         return f"<ReviewEmbedding review_id={self.review_id} model={self.model}>"
