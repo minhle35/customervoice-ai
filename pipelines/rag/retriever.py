@@ -71,7 +71,7 @@ class ReviewChunk:
 def embed_query(query_text: str) -> list[float]:
     """Embed a retrieval query using the 'query:' prefix.
 
-    multilingual-e5-base requires:
+    the model requires:
       - 'passage: <text>' for documents stored in the index
       - 'query: <text>'   for queries at retrieval time
     Using the wrong prefix degrades recall significantly.
