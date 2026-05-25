@@ -11,6 +11,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
+from app.integrations.google import GoogleHandler
+
 # ---------------------------------------------------------------------------
 # sys.path — make app.* and pipelines.* importable from every test file
 # ---------------------------------------------------------------------------
@@ -32,6 +34,7 @@ TEST_DATABASE_URL = os.environ.get(
 # Session-scoped engine — created once, shared across all tests
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="session")
 def db_engine():
     engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True)
@@ -46,6 +49,7 @@ def db_engine():
 # ---------------------------------------------------------------------------
 # Function-scoped DB session — each test runs inside a rolled-back transaction
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def db(db_engine):
@@ -65,6 +69,7 @@ def db(db_engine):
 # FastAPI TestClient — get_db dependency overridden with the test session
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def client(db):
     from app.database.database import get_db
@@ -77,8 +82,17 @@ def client(db):
 
 
 # ---------------------------------------------------------------------------
+# Create a global instance of GoogleHandler()
+# ---------------------------------------------------------------------------
+@pytest.fixture()
+def handlingGoogleReview():
+    return GoogleHandler()
+
+
+# ---------------------------------------------------------------------------
 # Reusable ReviewCreate factory helper
 # ---------------------------------------------------------------------------
+
 
 def make_review_create(
     *,
@@ -91,6 +105,7 @@ def make_review_create(
     author: str | None = "Test User",
 ):
     from app.schemas.review_schema import ReviewCreate
+
     return ReviewCreate(
         platform=platform,
         platform_id=platform_id,

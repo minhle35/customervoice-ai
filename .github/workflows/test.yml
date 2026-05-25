@@ -1,0 +1,70 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [main, "feat/**", "fix/**", "refactor/**", "test/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-api:
+    name: Unit & API tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run unit + API tests
+        run: uv run pytest tests/unit/ tests/api/ --cov=app --cov=pipelines --cov-report=term-missing -q
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: customer_voice_ai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run migrations
+        env:
+          DB__NAME: customer_voice_ai_test
+        run: uv run alembic upgrade head
+
+      - name: Run integration tests
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
+        run: uv run pytest tests/integration/ --cov=app --cov=pipelines --cov-report=term-missing -q
