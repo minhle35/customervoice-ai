@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from openai import RateLimitError
+from openai import NotFoundError, RateLimitError
 
 from pipelines.orchestration.pipeline_runner import ingest, process_unprocessed
 from workers.celery_app import celery_app
 
-# Never auto-retry on rate limits — the task would just hammer the API again.
-# RateLimitError should be handled with a longer backoff at the OpenAI client level.
+# RateLimitError  — don't retry, let the caller use process_unprocessed_reviews later
+# NotFoundError   — model endpoint missing (wrong model name or provider outage);
+#                   retrying re-fetches from SerpAPI and burns quota without fixing anything
 _RETRYABLE = (Exception,)
-_NO_RETRY = (RateLimitError,)
+_NO_RETRY = (RateLimitError, NotFoundError)
 
 
 @celery_app.task(

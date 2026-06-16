@@ -1,12 +1,19 @@
 import os
 from contextlib import asynccontextmanager
 
+import httpx
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import routes_agent, routes_chat, routes_insights, routes_integrations, routes_reviews
+from app.api import (
+    routes_agent,
+    routes_chat,
+    routes_insights,
+    routes_integrations,
+    routes_reviews,
+)
 from app.config import get_settings
 from app.database import init_db
 from app.logger import configure_logging, get_logger
@@ -27,7 +34,32 @@ os.environ.setdefault("LANGSMITH_PROJECT", _settings.langsmith_project)
 async def lifespan(_app: FastAPI):
     logger.info("Starting up CustomerVoice AI API")
     init_db()
-    yield
+    serp_client = httpx.AsyncClient(
+        base_url="https://serpapi.com",
+        timeout=httpx.Timeout(
+            connect=3.0,
+            read=12.0,
+            write=3.0,
+            pool=1.0,
+        ),
+        limits=httpx.Limits(
+            max_connections=100,
+            max_keepalive_connections=20,
+            keepalive_expiry=30.0,
+        ),
+    )
+    webhook_client = httpx.AsyncClient(
+        timeout=httpx.Timeout(connect=2.0, read=5.0, write=2.0, pool=1.0),
+        limits=httpx.Limits(max_connections=50),
+    )
+    _app.state.serp_client = serp_client
+    _app.state.webhook_client = webhook_client
+
+    try:
+        yield
+    finally:
+        await serp_client.aclose()
+        await webhook_client.aclose()
     logger.info("Shutting down CustomerVoice AI API")
 
 

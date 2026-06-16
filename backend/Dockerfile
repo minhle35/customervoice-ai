@@ -30,7 +30,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
     --mount=type=bind,source=backend/uv.lock,target=uv.lock \
     uv sync \
         --no-install-project \
-        --locked \
+        --frozen \
         --compile-bytecode
 
 # Copy backend source
@@ -43,7 +43,7 @@ COPY pipelines/ /app/pipelines/
 # Install project itself
 RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked
+    uv sync --frozen
 
 # Activate venv
 ENV PATH="/opt/venv/bin:$PATH"

@@ -99,7 +99,7 @@ class ServerSettings(BaseSettings):
     # OpenRouter (chat/LLM — OpenAI-compatible)
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_chat_model: str = "google/gemini-2.0-flash-001"
+    openrouter_chat_model: str = "google/gemini-2.5-flash"
 
     # Embeddings — sentence-transformers (local, no API cost)
     embedding_model: str = "intfloat/multilingual-e5-base"

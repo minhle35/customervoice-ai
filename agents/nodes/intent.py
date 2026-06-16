@@ -110,6 +110,7 @@ def intent_node(state: AgentState, settings: ServerSettings) -> dict:
         base_url=settings.openrouter_base_url,
         model=settings.openrouter_chat_model,
         temperature=0.0,  # deterministic classification
+        max_tokens=200,
     )
 
     # with_structured_output wraps the LLM call with JSON-schema enforcement

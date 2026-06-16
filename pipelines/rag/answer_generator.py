@@ -31,6 +31,7 @@ def _build_chain(api_key: str, base_url: str, model: str):
         base_url=base_url,
         model=model,
         temperature=0.2,
+        max_tokens=1500,
     )
     prompt = ChatPromptTemplate.from_messages(
         [
