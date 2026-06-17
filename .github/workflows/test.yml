@@ -67,4 +67,5 @@ jobs:
       - name: Run integration + API tests
         env:
           TEST_DATABASE_URL: postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
+          DB__NAME: customer_voice_ai_test
         run: uv run pytest tests/integration/ tests/api/ --cov=app --cov=pipelines --cov-report=term-missing -q
