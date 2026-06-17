@@ -60,6 +60,7 @@ def analyze_sentiment_and_topics(text: str, max_topics: int = 5) -> SentimentRes
             {"role": "user", "content": text},
         ],
         temperature=0.2,
+        max_tokens=300,
     )
     content = resp.choices[0].message.content or "{}"
     data = _extract_json(content)

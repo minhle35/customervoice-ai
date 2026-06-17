@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: backend-unit-tests
+        name: "Backend — unit tests"
+        entry: bash -c "cd backend && uv run pytest tests/unit/ -q --no-header"
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+        always_run: true
+
+      - id: backend-db-tests
+        name: "Backend — integration + API tests"
+        entry: bash -c "cd backend && uv run pytest tests/integration/ tests/api/ -q --no-header"
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+        always_run: true

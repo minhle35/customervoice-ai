@@ -18,6 +18,23 @@ This document defines the testing strategy for the backend. Tests are organised 
 
 ---
 
+## Why Docker PostgreSQL (not SQLite)
+
+Integration and API tests require a **real PostgreSQL instance with the pgvector extension**. SQLite is not a drop-in replacement here — the schema uses three PostgreSQL-native features that SQLite cannot emulate:
+
+| Feature | Where used | Why SQLite can't do it |
+|---------|-----------|----------------------|
+| `Vector(768)` from `pgvector.sqlalchemy` | `app/models/embedding.py` | pgvector is a PostgreSQL-only extension; the type doesn't exist in SQLite |
+| `ARRAY(String)` | `app/models/review.py` — `topics` column | PostgreSQL native array type; SQLite has no array column |
+| `UUID` from `sqlalchemy.dialects.postgresql` | `app/models/review.py`, `app/models/embedding.py` | Uses the native PostgreSQL UUID type; SQLite stores UUIDs as text with different handling |
+| `DISTINCT ON (column)` | `app/services/review_service.py` — `get_distinct_businesses()` | PostgreSQL-only syntax; SQLite only supports `SELECT DISTINCT *` |
+
+SQLAlchemy would fail to reflect or create the schema against SQLite because of these types. Beyond schema, the RAG pipeline's `CAST(:query_vec AS vector)` syntax and `<=>` cosine distance operator only exist inside pgvector — testing against anything else gives false confidence.
+
+The `pgvector/pgvector:pg16` Docker image is the same base as production. `docker compose up db -d` starts in ~3 seconds. Each test rolls back its own transaction, so there is no cleanup between tests.
+
+---
+
 ## Tooling
 
 | Tool | Purpose |
@@ -31,37 +48,44 @@ This document defines the testing strategy for the backend. Tests are organised 
 | `factory_boy` | Test data factories for models |
 | `docker compose` | Spin up real DB + Redis for integration/E2E |
 
-Install dev extras:
+These are already declared in `pyproject.toml` under `[project.optional-dependencies] dev`. Install with:
+
 ```bash
-uv add --dev pytest pytest-asyncio httpx pytest-mock pytest-cov factory-boy respx
+uv sync --dev
 ```
 
 ---
 
 ## Directory Structure
 
+Files marked ⚠️ exist but are empty — tests not yet written.
+
 ```
 backend/tests/
-├── conftest.py                          # shared fixtures (DB session, app client)
+├── conftest.py                          # shared fixtures (DB session, app client, make_review_create)
 │
 ├── unit/
 │   ├── test_google_reviews_ingestion.py # _stable_id, _parse_datetime, _parse_reviews_from_page,
 │   │                                    # fetch_google_reviews (pagination, max_reviews, Z suffix)
 │   ├── test_platform_handlers.py        # GoogleHandler.derive_business_id, registry.get_handler
-│   ├── test_clean_reviews.py            # text cleaning pipeline
-│   ├── test_sentiment_analysis.py       # LLM wrapper (mocked)
-│   ├── test_generate_embeddings.py      # embedding wrapper (mocked)
-│   └── test_review_schemas.py           # Pydantic schema validation
+│   ├── test_rag_retriever.py            # embed_query, retrieve, rerank  (see baseline_RAG_testing.md)
+│   ├── test_rag_context_builder.py      # build_context  (see baseline_RAG_testing.md)
+│   ├── test_rag_answer_generator.py     # generate_answer  (see baseline_RAG_testing.md)
+│   ├── test_clean_reviews.py            # ⚠️ text cleaning pipeline
+│   ├── test_sentiment_analysis.py       # ⚠️ LLM wrapper (mocked)
+│   ├── test_generate_embeddings.py      # ⚠️ embedding wrapper (mocked)
+│   └── test_review_schemas.py           # ⚠️ Pydantic schema validation
 │
 ├── integration/
 │   ├── test_review_service.py           # ReviewService against real test DB
-│   ├── test_embedding_service.py        # EmbeddingService against real test DB
-│   └── test_pipeline_runner.py          # ingest() + process_unprocessed() (external APIs mocked)
+│   ├── test_pipeline_runner.py          # ingest() + process_unprocessed() (external APIs mocked)
+│   └── test_embedding_service.py        # ⚠️ EmbeddingService against real test DB
 │
 ├── api/
+│   ├── test_routes_chat.py              # POST /api/chat
 │   ├── test_routes_reviews.py           # GET /api/reviews, GET /api/reviews/{id}, GET /api/reviews/businesses
 │   ├── test_routes_integrations.py      # POST /api/integrations/{platform}, GET /tasks/{id}, POST /reprocess
-│   └── test_routes_health.py            # GET /health
+│   └── test_routes_health.py            # ⚠️ GET /health
 │
 └── e2e/
     └── test_full_pipeline.py            # POST → Celery → SerpAPI (respx mock) → DB → GET reviews
@@ -174,7 +198,7 @@ class TestFetchGoogleReviews:
 
 ### 1.2 Platform Handler & Registry (`app/integrations/`)
 
-File: `tests/unit/test_platform_handlers.py` ← new file
+File: `tests/unit/test_platform_handlers.py`
 
 ```python
 class TestGoogleHandlerDeriveBusinessId:
@@ -213,7 +237,7 @@ class TestRegistry:
 
 ### 1.3 Text Cleaning (`pipelines/processing/clean_reviews.py`)
 
-File: `tests/unit/test_clean_reviews.py`
+File: `tests/unit/test_clean_reviews.py` — ⚠️ not yet written
 
 ```python
 class TestCleanReviewText:
@@ -237,7 +261,7 @@ class TestCleanReviewText:
 
 ### 1.4 Sentiment Analysis (`pipelines/processing/sentiment_analysis.py`)
 
-File: `tests/unit/test_sentiment_analysis.py`
+File: `tests/unit/test_sentiment_analysis.py` — ⚠️ not yet written
 
 All tests mock the LLM call — zero real API calls.
 
@@ -255,7 +279,7 @@ class TestAnalyseSentimentAndTopics:
 
 ### 1.5 Pydantic Schema Validation (`app/schemas/review_schema.py`)
 
-File: `tests/unit/test_review_schemas.py`
+File: `tests/unit/test_review_schemas.py` — ⚠️ not yet written
 
 ```python
 class TestReviewCreate:
@@ -270,6 +294,14 @@ class TestIngestRequest:
 
 ---
 
+### 1.6 RAG Pipeline Unit Tests
+
+Files: `tests/unit/test_rag_retriever.py`, `tests/unit/test_rag_context_builder.py`, `tests/unit/test_rag_answer_generator.py`
+
+These are fully implemented. See `baseline_RAG_testing.md` for the full test plan and coverage details.
+
+---
+
 ## Layer 2 — Integration Tests
 
 **Scope:** Real PostgreSQL (test DB), no external HTTP. External APIs mocked.
@@ -279,42 +311,57 @@ class TestIngestRequest:
 ```bash
 # one-time setup
 docker compose up db -d
-psql -U postgres -c "CREATE DATABASE customer_voice_ai_test;"
-DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/customer_voice_ai_test \
-  uv run alembic upgrade head
+docker compose exec db psql -U postgres -c "CREATE DATABASE customer_voice_ai_test;"
+DB__NAME=customer_voice_ai_test uv run alembic upgrade head
 ```
+
+> `DB__NAME` overrides the nested pydantic `DatabaseSettings.name` field.
+> Do not use `DATABASE_URL=...` — it does not map to the nested settings structure.
 
 **Run with:**
 ```bash
-DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/customer_voice_ai_test \
-  uv run pytest tests/integration/ -v
+uv run pytest tests/integration/ -v
+```
+
+No env var needed — `conftest.py` defaults to `127.0.0.1:5432/customer_voice_ai_test`. If your Docker DB uses different credentials, set:
+```bash
+export TEST_DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
 ```
 
 ---
 
-### Shared fixture (`conftest.py`)
+### Shared fixtures (`conftest.py`)
 
 ```python
 @pytest.fixture(scope="session")
-def engine():
-    return create_engine(os.environ["TEST_DATABASE_URL"])
+def db_engine():
+    engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True)
+    # Ensure pgvector extension exists in the test DB
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.commit()
+    yield engine
+    engine.dispose()
 
 @pytest.fixture()
-def db(engine):
+def db(db_engine):
     """Each test gets a transaction rolled back on teardown — no cleanup needed."""
-    with engine.connect() as conn:
-        tx = conn.begin()
-        session = Session(bind=conn)
-        yield session
-        tx.rollback()
-        session.close()
+    connection = db_engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
 ```
+
+The fixture is named `db_engine` (not `engine`). The `db_engine` fixture also creates the pgvector extension if it doesn't already exist — necessary because `Vector(768)` columns require `CREATE EXTENSION vector` before any table can be created.
 
 ---
 
 ### 2.1 ReviewService (`app/services/review_service.py`)
 
-File: `tests/integration/test_review_service.py`
+File: `tests/integration/test_review_service.py` ← fully implemented
 
 ```python
 class TestUpsertReview:
@@ -355,7 +402,7 @@ class TestGetDistinctBusinesses:
 
 ### 2.2 EmbeddingService (`app/services/embedding_service.py`)
 
-File: `tests/integration/test_embedding_service.py`
+File: `tests/integration/test_embedding_service.py` — ⚠️ not yet written
 
 ```python
 class TestUpsertEmbedding:
@@ -373,12 +420,11 @@ class TestUpsertEmbedding:
 
 ### 2.3 Pipeline Runner (`pipelines/orchestration/pipeline_runner.py`)
 
-File: `tests/integration/test_pipeline_runner.py`
+File: `tests/integration/test_pipeline_runner.py` ← fully implemented
 
 External APIs mocked; DB is real.
 
-**Important:** `GoogleHandler.fetch_reviews` does a local import inside the method body,
-so the correct mock target is the module where the function is *defined*, not where it is called from.
+**Important:** `GoogleHandler.fetch_reviews` does a local import inside the method body, so the correct mock target is the module where the function is *defined*, not where it is called from.
 
 ```python
 @pytest.fixture
@@ -402,45 +448,17 @@ def mock_embedding(mocker):
         "pipelines.orchestration.pipeline_runner.generate_embedding",
         return_value=[0.0] * 768
     )
+```
 
+The pipeline runner opens its own DB session internally. A `mock_get_session` fixture redirects it to the test session so the test can observe and roll back the written data:
 
-class TestIngest:
-    def test_stores_review_in_db(self, db, mock_serpapi, mock_sentiment, mock_embedding):
-        result = ingest("google", "biz-1", {})
-        assert result["processed"] == 1
-        # query DB: review exists, is_processed=True, embedding row exists
-
-    def test_sets_is_processed_true_after_success(self, db, ...): ...
-
-    def test_stores_embedding_with_correct_dimensions(self, db, ...):
-        # query review_embeddings: len(embedding) == 768
-
-    def test_deduplicates_same_platform_id(self, db, mock_serpapi, ...):
-        # mock returns 2 reviews with same platform_id
-        # → only 1 row in reviews table
-
-    def test_skips_already_processed_review(self, db, ...):
-        # run ingest twice → second run: skipped==1, processed==0
-
-    def test_stops_on_rate_limit_cleanly(self, db, mock_serpapi, mocker):
-        # mock_sentiment raises RateLimitError on second call
-        # → first processed, rest left as is_processed=False
-        # → result["rate_limited"] == 1
-
-    def test_unsupported_platform_raises(self, db):
-        with pytest.raises(KeyError):
-            ingest("tiktok", "biz-1", {})
-
-
-class TestProcessUnprocessed:
-    def test_processes_all_unprocessed(self, db, mock_sentiment, mock_embedding):
-        # seed 3 unprocessed reviews → result["processed"] == 3
-
-    def test_respects_limit_param(self, db, ...):
-        # seed 10 unprocessed, limit=3 → processed == 3
-
-    def test_stops_cleanly_on_rate_limit(self, db, ...):
-        # mock raises RateLimitError after first → processed==1, rate_limited==1
+```python
+@pytest.fixture
+def mock_get_session(mocker, db):
+    @contextmanager
+    def _use_test_db():
+        yield db
+    mocker.patch("pipelines.orchestration.pipeline_runner.get_session", new=_use_test_db)
 ```
 
 ---
@@ -451,6 +469,8 @@ class TestProcessUnprocessed:
 
 **Run with:** `uv run pytest tests/api/ -v`
 
+No DB env var needed — `conftest.py` provides the default URL and all test transaction rollbacks are handled automatically.
+
 ---
 
 ### Shared fixture
@@ -459,17 +479,41 @@ class TestProcessUnprocessed:
 @pytest.fixture()
 def client(db):
     """Override get_db dependency to use the test transaction session."""
+    from app.database.database import get_db
+    from app.main import app
     app.dependency_overrides[get_db] = lambda: db
-    with TestClient(app) as c:
+    with TestClient(app, raise_server_exceptions=True) as c:
         yield c
     app.dependency_overrides.clear()
 ```
 
 ---
 
-### 3.1 GET /api/reviews (`routes_reviews.py`)
+### 3.1 POST /api/chat (`routes_chat.py`)
 
-File: `tests/api/test_routes_reviews.py`
+File: `tests/api/test_routes_chat.py` ← fully implemented
+
+```python
+class TestChatEndpoint:
+    def test_returns_200_with_answer_and_sources(self, client): ...
+    def test_returns_200_with_empty_sources(self, client): ...
+    def test_uses_latest_user_message_as_question(self, client): ...
+    def test_passes_business_id_to_pipeline(self, client): ...
+    def test_missing_business_id_returns_422(self, client): ...
+    def test_empty_messages_returns_422(self, client): ...
+    def test_messages_with_only_assistant_role_returns_422(self, client): ...
+    def test_pipeline_exception_returns_500(self, client): ...
+    def test_invalid_role_returns_422(self, client): ...
+    def test_empty_content_returns_422(self, client): ...
+```
+
+`run_rag_pipeline` is patched in all tests — no real LLM or DB calls.
+
+---
+
+### 3.2 GET /api/reviews (`routes_reviews.py`)
+
+File: `tests/api/test_routes_reviews.py` ← fully implemented
 
 ```python
 class TestListReviews:
@@ -496,9 +540,9 @@ class TestListBusinesses:
 
 ---
 
-### 3.2 POST /api/integrations/{platform} (`routes_integrations.py`)
+### 3.3 POST /api/integrations/{platform} (`routes_integrations.py`)
 
-File: `tests/api/test_routes_integrations.py`
+File: `tests/api/test_routes_integrations.py` ← fully implemented
 
 ```python
 @pytest.fixture
@@ -511,83 +555,27 @@ def mock_celery(mocker):
 
 
 class TestTriggerIngestion:
-    def test_valid_google_request_returns_queued_and_task_id(self, client, mock_celery):
-        resp = client.post("/api/integrations/google", json={
-            "platform": "google", "business_id": "biz-1",
-            "params": {"data_id": "0x123"}
-        })
-        assert resp.status_code == 200
-        assert resp.json() == {"status": "queued", "task_id": "test-task-id-123"}
-
-    def test_unsupported_platform_returns_422(self, client):
-        resp = client.post("/api/integrations/tiktok", json={
-            "platform": "tiktok", "params": {}
-        })
-        assert resp.status_code == 422
-
-    def test_missing_data_id_and_place_id_returns_422(self, client, mock_celery):
-        resp = client.post("/api/integrations/google", json={
-            "platform": "google", "params": {}
-        })
-        assert resp.status_code == 422
-
-    def test_celery_called_with_correct_args(self, client, mock_celery):
-        client.post("/api/integrations/google", json={
-            "platform": "google", "business_id": "biz-1",
-            "params": {"data_id": "0x123"}
-        })
-        mock_celery.assert_called_once_with("google", "biz-1", {"data_id": "0x123"})
-
-    def test_max_reviews_forwarded_in_params(self, client, mock_celery):
-        client.post("/api/integrations/google", json={
-            "platform": "google", "params": {"data_id": "0x123", "max_reviews": 50}
-        })
-        _, _, params = mock_celery.call_args[0]
-        assert params["max_reviews"] == 50
-
+    def test_valid_google_request_returns_queued_and_task_id(self, client, mock_celery): ...
+    def test_unsupported_platform_returns_422(self, client): ...
+    def test_missing_data_id_and_place_id_returns_422(self, client, mock_celery): ...
+    def test_celery_called_with_correct_args(self, client, mock_celery): ...
+    def test_max_reviews_forwarded_in_params(self, client, mock_celery): ...
 
 class TestGetTaskStatus:
-    def test_pending_task(self, client, mocker):
-        mocker.patch("app.api.routes_integrations.celery_app.AsyncResult",
-                     return_value=mocker.MagicMock(state="PENDING"))
-        resp = client.get("/api/integrations/tasks/fake-id")
-        assert resp.json()["status"] == "PENDING"
-
-    def test_progress_includes_stage_fields(self, client, mocker):
-        result = mocker.MagicMock(state="PROGRESS",
-                                  info={"stage": "saving", "total": 10, "saved": 3})
-        mocker.patch("app.api.routes_integrations.celery_app.AsyncResult", return_value=result)
-        resp = client.get("/api/integrations/tasks/fake-id")
-        assert resp.json()["progress"]["stage"] == "saving"
-
-    def test_success_includes_result(self, client, mocker):
-        result = mocker.MagicMock(state="SUCCESS",
-                                  result={"processed": 5, "skipped": 0})
-        mocker.patch("app.api.routes_integrations.celery_app.AsyncResult", return_value=result)
-        resp = client.get("/api/integrations/tasks/fake-id")
-        assert resp.json()["result"]["processed"] == 5
-
-    def test_failure_returns_error_message(self, client, mocker):
-        result = mocker.MagicMock(state="FAILURE", info=Exception("boom"))
-        mocker.patch("app.api.routes_integrations.celery_app.AsyncResult", return_value=result)
-        resp = client.get("/api/integrations/tasks/fake-id")
-        assert "error" in resp.json()
-
+    def test_pending_task(self, client, mocker): ...
+    def test_progress_includes_stage_fields(self, client, mocker): ...
+    def test_success_includes_result(self, client, mocker): ...
+    def test_failure_returns_error_message(self, client, mocker): ...
 
 class TestReprocess:
-    def test_queues_task_and_returns_task_id(self, client, mocker):
-        task = mocker.MagicMock(id="reprocess-task-id")
-        mocker.patch("app.api.routes_integrations.process_unprocessed_reviews.delay",
-                     return_value=task)
-        resp = client.post("/api/integrations/reprocess")
-        assert resp.json()["task_id"] == "reprocess-task-id"
+    def test_queues_task_and_returns_task_id(self, client, mocker): ...
 ```
 
 ---
 
-### 3.3 GET /health
+### 3.4 GET /health
 
-File: `tests/api/test_routes_health.py`
+File: `tests/api/test_routes_health.py` — ⚠️ not yet written
 
 ```python
 class TestHealthEndpoint:
@@ -620,130 +608,15 @@ uv run pytest tests/e2e/ -v --timeout=60
 File: `tests/e2e/test_full_pipeline.py`
 
 ```python
-import time, respx, httpx
-
-SERPAPI_FIXTURE = {
-    "reviews": [{
-        "review_id": "e2e-review-1",
-        "user": {"name": "E2E User", "reviews": 5, "photos": 0},
-        "snippet": "Full stack smoke test — works great!",
-        "rating": 5,
-        "iso_date": "2025-01-01T00:00:00Z",
-    }]
-}
-
-@pytest.fixture
-def mock_serpapi():
-    with respx.mock:
-        respx.get("https://serpapi.com/search.json").mock(
-            return_value=httpx.Response(200, json=SERPAPI_FIXTURE)
-        )
-        yield
-
-@pytest.fixture
-def mock_openrouter(mocker):
-    mocker.patch(
-        "pipelines.processing.sentiment_analysis.analyze_sentiment_and_topics",
-        return_value=SentimentResult(score=0.9, label="positive", topics=["food"])
-    )
-    mocker.patch(
-        "pipelines.orchestration.pipeline_runner.generate_embedding",
-        return_value=[0.0] * 768
-    )
-
-
-def wait_for_task(client, task_id: str, timeout: int = 30) -> dict:
-    for _ in range(timeout):
-        status = client.get(f"/api/integrations/tasks/{task_id}").json()
-        if status["status"] in ("SUCCESS", "FAILURE"):
-            return status
-        time.sleep(1)
-    raise TimeoutError(f"Task {task_id} did not complete within {timeout}s")
-
-
 class TestFullIngestionFlow:
-    def test_ingest_review_visible_via_api(self, live_client, mock_serpapi, mock_openrouter):
-        # 1. Trigger ingestion
-        resp = live_client.post("/api/integrations/google", json={
-            "platform": "google",
-            "params": {"data_id": "0xe2e123", "place_name": "E2E Restaurant", "max_reviews": 10}
-        })
-        assert resp.status_code == 200
-        task_id = resp.json()["task_id"]
-
-        # 2. Wait for worker to finish
-        status = wait_for_task(live_client, task_id)
-        assert status["status"] == "SUCCESS"
-        assert status["result"]["processed"] == 1
-
-        # 3. Review visible via GET /api/reviews
-        reviews = live_client.get("/api/reviews?business_id=0xe2e123").json()
-        assert reviews["total"] == 1
-        item = reviews["items"][0]
-        assert item["content"] == "Full stack smoke test — works great!"
-        assert item["published_at"] == "2025-01-01T00:00:00+00:00"
-        assert item["sentiment_label"] == "positive"
-        assert item["is_processed"] is True
-
-    def test_duplicate_ingestion_does_not_create_extra_rows(self, live_client, mock_serpapi, mock_openrouter):
-        for _ in range(2):
-            resp = live_client.post("/api/integrations/google", json={
-                "platform": "google",
-                "params": {"data_id": "0xdupe", "max_reviews": 10}
-            })
-            wait_for_task(live_client, resp.json()["task_id"])
-
-        reviews = live_client.get("/api/reviews?business_id=0xdupe").json()
-        assert reviews["total"] == 1  # not 2
-
-    def test_business_appears_in_businesses_list(self, live_client, mock_serpapi, mock_openrouter):
-        resp = live_client.post("/api/integrations/google", json={
-            "platform": "google",
-            "params": {"data_id": "0xbiz", "place_name": "E2E Café", "max_reviews": 10}
-        })
-        wait_for_task(live_client, resp.json()["task_id"])
-
-        businesses = live_client.get("/api/reviews/businesses").json()
-        business_ids = [b["business_id"] for b in businesses]
-        assert "0xbiz" in business_ids
+    def test_ingest_review_visible_via_api(self, live_client, mock_serpapi, mock_openrouter): ...
+    def test_duplicate_ingestion_does_not_create_extra_rows(self, ...): ...
+    def test_business_appears_in_businesses_list(self, ...): ...
 ```
 
 ---
 
 ## Running Tests
-
-### The `TEST_DATABASE_URL` environment variable
-
-Integration and API tests need a real Postgres database. The variable that controls which DB is used is:
-
-```
-TEST_DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
-```
-
-**Do you have to set it every time?** No. `conftest.py` has a hardcoded fallback:
-
-```python
-TEST_DATABASE_URL = os.environ.get(
-    "TEST_DATABASE_URL",
-    "postgresql+psycopg2://postgres:postgres@localhost:5432/customer_voice_ai_test",
-)
-```
-
-So if your Docker DB is running on the default port with the default credentials, you can omit the variable entirely.
-
-**⚠️ `127.0.0.1` vs `localhost`**
-
-On macOS, `localhost` resolves to `::1` (IPv6). If you also have a local Homebrew Postgres installed, it listens on IPv6 and will intercept the connection — bypassing Docker's container entirely. The Homebrew Postgres does not have `pgvector`, so tests will fail with extension errors.
-
-Use `127.0.0.1` explicitly to force IPv4 and always hit Docker:
-
-```bash
-export TEST_DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
-```
-
-Add this export to your shell profile (`~/.zshrc`) or a local `.env.test` file to avoid repeating it.
-
----
 
 ### One-time DB setup (Docker)
 
@@ -758,63 +631,60 @@ docker compose exec db psql -U postgres -c "CREATE DATABASE customer_voice_ai_te
 DB__NAME=customer_voice_ai_test uv run alembic upgrade head
 ```
 
-> `DB__NAME` overrides the nested pydantic `DatabaseSettings.name` field.
-> Do not use `DATABASE_URL=...` — it does not map to the nested settings structure.
+---
+
+### The `TEST_DATABASE_URL` environment variable
+
+`conftest.py` defaults to:
+```
+postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
+```
+
+So if your Docker DB runs on the default port with the default credentials, **no env var is needed**.
+
+If you need to override it:
+```bash
+export TEST_DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test
+```
+
+**⚠️ Use `127.0.0.1`, not `localhost`**
+
+On macOS, `localhost` resolves to `::1` (IPv6). If Homebrew Postgres is installed, it listens on IPv6 and will intercept the connection instead of Docker. Homebrew Postgres does not have pgvector, so tests will fail with extension errors. `127.0.0.1` forces IPv4 and always hits Docker.
 
 ---
 
 ### Run all tests
 
 ```bash
-# With env var set in shell
 uv run pytest tests/ -v
-
-# Passing the env var inline (useful for one-off runs)
-TEST_DATABASE_URL=postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/customer_voice_ai_test \
-  uv run pytest tests/ -v
 ```
 
 ### Run a specific layer
 
 ```bash
 uv run pytest tests/unit/        -v   # no DB needed
-uv run pytest tests/api/         -v   # no DB needed (uses test transaction session)
+uv run pytest tests/api/         -v   # requires Docker DB (uses test transaction session)
 uv run pytest tests/integration/ -v   # requires Docker DB
 uv run pytest tests/e2e/         -v --timeout=60   # requires full docker compose stack
 ```
 
-### Run a specific file
+### Run a specific file or test
 
 ```bash
 uv run pytest tests/unit/test_platform_handlers.py -v
-uv run pytest tests/integration/test_review_service.py -v
-```
-
-### Run a specific class or test
-
-```bash
-# Single class
-uv run pytest tests/unit/test_platform_handlers.py::TestRegistry -v
-
-# Single test
+uv run pytest tests/integration/test_review_service.py::TestUpsertReview -v
 uv run pytest tests/unit/test_platform_handlers.py::TestRegistry::test_get_handler_unsupported_raises_key_error -v
 ```
 
-### Run with coverage and HTML report
+### Run with coverage
 
 ```bash
-# Using the convenience script (sets TEST_DATABASE_URL automatically)
-./scripts/coverage.sh
-
-# Target a specific path
-./scripts/coverage.sh tests/unit
-
-# Or manually
 uv run pytest tests/ --cov --cov-report=html:htmlcov --cov-report=term-missing
 # Report written to htmlcov/index.html
 ```
 
 ### Coverage targets
+
 | Layer | Target |
 |-------|--------|
 | Unit | ≥ 90% |
@@ -829,17 +699,14 @@ uv run pytest tests/ --cov --cov-report=html:htmlcov --cov-report=term-missing
 | Item | Reason |
 |------|--------|
 | Real SerpAPI HTTP calls | Costs money, rate-limited, non-deterministic |
-| Real OpenRouter/Gemini calls | Costs money, rate-limited |
+| Real OpenRouter/Gemini calls | Costs money, rate-limited — all LLM boundaries are mocked in pytest |
 | Celery broker/worker internals | Trust the library; test task logic directly |
 | Embedding model download | Slow; mocked in all layers except E2E |
+| RAG pipeline quality | Covered by RAGAS evaluation in `tests/evaluation/` — run manually, not in CI |
 | Frontend | Separate suite (Playwright for E2E, Vitest for unit) |
 
 ---
 
 ## CI Integration
-
-```yaml
-# .github/workflows/test.yml
-```
 
 Unit + API run on every PR. Integration runs on merge to main. E2E runs nightly.

@@ -25,7 +25,7 @@ dependencies = [
     "torch",
     "sentence-transformers>=3.0.0",
     # HTTP client
-    "httpx>=0.28.1",
+    "httpx==0.27.2",
     # Ingestion + cleaning
     "praw>=7.7.1",
     "beautifulsoup4>=4.12",
@@ -40,16 +40,19 @@ dependencies = [
     "deepeval>=2.6.7",
     "mlflow>=3.10.1",
     "langfuse>=4.0.1",
+    "ragas>=0.2.0",
 ]
 
 [dependency-groups]
 dev = [
     "factory-boy>=3.3.3",
     "httpx>=0.27.2",
+    "pre-commit>=3.7.0",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=7.0.0",
     "pytest-mock>=3.15.1",
+    "respx>=0.23.1",
 ]
 
 [tool.uv.sources]
@@ -65,3 +68,14 @@ testpaths = ["tests"]
 # deepeval's pytest plugin imports google.genai (not installed) and crashes at collection
 # The plugin is registered under the name "plugins" — disable it for regular test runs
 addopts = "-p no:plugins"
+
+[tool.coverage.run]
+source = ["app", "pipelines"]
+omit = ["*/tests/*", "*/migrations/*", "*/alembic/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "htmlcov"

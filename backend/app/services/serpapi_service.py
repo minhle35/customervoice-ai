@@ -22,8 +22,8 @@ import httpx
 
 from app.config import get_settings
 
-SERPAPI_ENDPOINT = "https://serpapi.com/search.json"
-_MAX_CANDIDATES = 5
+_SEARCH_PATH = "/search.json"
+_MAX_CANDIDATES = 10
 
 
 @dataclass
@@ -37,20 +37,21 @@ class PlaceResult:
 
 
 class SerpApiService:
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(self, client: httpx.AsyncClient, api_key: str | None = None) -> None:
+        self._client = client
         self._api_key = api_key or get_settings().google_reviews_api_key
         if not self._api_key:
             raise ValueError("GOOGLE_REVIEWS_API_KEY is not set")
 
-    def search_places(self, query: str, country: str = "us") -> list[PlaceResult]:
+    async def search_places(self, query: str, country: str = "us") -> list[PlaceResult]:
         """Search Google Maps for a business by name.
 
         Returns up to _MAX_CANDIDATES results, each with a data_id
         that can be used to fetch reviews via the ingestion pipeline.
         """
         try:
-            response = httpx.get(
-                SERPAPI_ENDPOINT,
+            response = await self._client.get(
+                _SEARCH_PATH,
                 params={
                     "engine": "google_maps",
                     "q": query,
@@ -58,15 +59,15 @@ class SerpApiService:
                     "hl": "en",
                     "gl": country,
                 },
-                timeout=15.0,
             )
             response.raise_for_status()
+            payload = response.json()
+        except httpx.TimeoutException:
+            raise RuntimeError("SerpAPI request timed out") from None
         except httpx.HTTPStatusError as exc:
             raise RuntimeError(
                 f"SerpAPI returned {exc.response.status_code}: {exc.response.text}"
             ) from None
-
-        payload = response.json()
 
         if "error" in payload:
             raise RuntimeError(f"SerpAPI error: {payload['error']}")
@@ -105,7 +106,7 @@ class SerpApiService:
 
         return results[:_MAX_CANDIDATES]
 
-    def resolve_data_id(self, query: str, country: str = "us") -> str | None:
+    async def resolve_data_id(self, query: str, country: str = "us") -> str | None:
         """Return the data_id of the top Google Maps match for a business name."""
-        results = self.search_places(query, country)
+        results = await self.search_places(query, country)
         return results[0].data_id if results else None

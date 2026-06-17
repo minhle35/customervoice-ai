@@ -14,3 +14,8 @@ settings/*
 
 # .DS_Store files (macOS)
 .DS_Store
+
+/docs
+
+.coverage
+

@@ -125,6 +125,7 @@ def insight_node(state: AgentState, db: Session, settings: ServerSettings) -> di
         base_url=settings.openrouter_base_url,
         model=settings.openrouter_chat_model,
         temperature=0.3,
+        max_tokens=1000,
     )
 
     messages = [

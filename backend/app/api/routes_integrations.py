@@ -2,13 +2,22 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, status
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.integrations.registry import SUPPORTED_PLATFORMS, get_handler
 from app.logger import get_logger
 from app.schemas.review_schema import IngestRequest
 from app.services.serpapi_service import PlaceResult, SerpApiService
+
+
+def _get_serp_client(request: Request) -> httpx.AsyncClient:
+    return request.app.state.serp_client
+
+
+SerpClientDep = Annotated[httpx.AsyncClient, Depends(_get_serp_client)]
 
 logger = get_logger(__name__)
 
@@ -28,7 +37,8 @@ router = APIRouter(prefix="/api/integrations", tags=["integrations"])
     response_model=list[PlaceResult],
     summary="GET /api/integrations/google/search",
 )
-def search_google_places(
+async def search_google_places(
+    client: SerpClientDep,
     q: str = Query(..., description="Business name to search"),
     country: str = Query("us", description="Two-letter country code, e.g. vn, au, us"),
 ):
@@ -37,7 +47,9 @@ def search_google_places(
     Use the returned data_id as params.data_id when triggering ingestion.
     """
     try:
-        return SerpApiService().search_places(query=q, country=country)
+        return await SerpApiService(client=client).search_places(
+            query=q, country=country
+        )
     except RuntimeError as exc:
         logger.error("SerpAPI search failed: %s", exc)
         raise HTTPException(
