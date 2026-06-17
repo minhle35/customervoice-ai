@@ -12,6 +12,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
 from app.integrations.google import GoogleHandler
+from app.models.review import Platform
 
 # ---------------------------------------------------------------------------
 # sys.path — make app.* and pipelines.* importable from every test file
@@ -96,7 +97,7 @@ def handlingGoogleReview():
 
 def make_review_create(
     *,
-    platform: str = "google",
+    platform: Platform = Platform.google,
     platform_id: str = "test-platform-id",
     business_id: str = "biz-test",
     business_name: str | None = "Test Business",
