@@ -90,6 +90,29 @@ class TestGenerateAnswer:
 
         assert len(used) == 1
 
+    def test_llm_exception_propagates(self):
+        """RuntimeError from the LLM chain must propagate — not be silently swallowed."""
+        chunks = [_make_chunk()]
+        fake_chain = MagicMock()
+        fake_chain.invoke.side_effect = RuntimeError("LLM unavailable")
+
+        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+            with pytest.raises(RuntimeError, match="LLM unavailable"):
+                generate_answer("q", chunks, **_LLM_KWARGS)
+
+    def test_used_chunks_order_matches_context_numbering(self):
+        """The Nth used_chunk corresponds to [N] in the context string passed to the LLM."""
+        chunks = [_make_chunk(content=f"topic {i}") for i in range(3)]
+        fake_chain = MagicMock()
+        fake_chain.invoke.return_value = "Answer [1] and [2]."
+
+        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+            _, used = generate_answer("q", chunks, token_budget=10000, **_LLM_KWARGS)
+
+        invoke_kwargs = fake_chain.invoke.call_args[0][0]
+        assert "[1]" in invoke_kwargs["context"]
+        assert used[0].content in invoke_kwargs["context"]
+
     def test_builds_chain_with_correct_credentials(self):
         chunks = [_make_chunk()]
         fake_chain = MagicMock()
