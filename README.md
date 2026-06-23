@@ -1,8 +1,8 @@
 # AI Operational Intelligence — RAG Research Platform
 
-A research and production engineering platform for **cross-source operational intelligence**: ingest multi-modal business signals, correlate evidence across data streams, and generate grounded root-cause hypotheses using multiple RAG system architectures evaluated head-to-head.
+A research and production engineering platform for **operational intelligence over customer signals**: ingest business reviews, extract entity relationships, and generate grounded answers using two RAG architectures evaluated head-to-head.
 
-> **Research question:** Given the same business query and the same data, which RAG architecture produces the most faithful, complete, and actionable answer — and at what cost?
+> **Research question:** For customer review Q&A, does GraphRAG's structural retrieval produce more faithful and complete answers than VectorRAG's semantic similarity — and at what latency/cost tradeoff?
 
 ---
 
@@ -25,7 +25,7 @@ No single RAG architecture handles this well. This platform is designed to measu
 
 ---
 
-## Data Sources — Multi-Modal Business Signals
+## Data Sources — Business Signals
 
 | Source | Signal Type | Ingestion Method |
 |--------|-------------|-----------------|
@@ -37,25 +37,15 @@ The data source is independently ingested, cleaned, chunked, embedded, and store
 
 ## RAG System Architectures Under Evaluation
 
-Six architectures are benchmarked against the same queries, the same data, and the same evaluation framework:
+Two architectures are benchmarked head-to-head — chosen because they represent fundamentally different retrieval strategies, not incremental tweaks:
 
-### 1. Baseline RAG
-Chunk → embed → top-K cosine search → LLM answer. The control system. Measures the floor: what you get with no architectural sophistication.
+### 1. VectorRAG *(baseline)*
+Chunk → embed → top-K cosine search (pgvector HNSW) → cross-encoder rerank → LLM answer. The control system. Measures the floor: what you get with semantic similarity alone.
 
-### 2. Hybrid RAG
-BM25 keyword search + vector cosine search, results fused via RRF (Reciprocal Rank Fusion). Stronger recall on named entities, product names, and rare terms that dense embeddings miss.
+### 2. Graph RAG
+Reviews are parsed into an entity-relationship graph. Queries traverse entity nodes and relationship edges — enabling reasoning like: "Which staff members are linked to both praise and complaints?". Structured retrieval over implicit connections that vector similarity misses.
 
-### 3. RAG-as-a-Service
-Delegates retrieval and generation to a managed API (OpenAI Assistants, Vertex AI Search, Glean). Measures the tradeoff: zero infrastructure cost vs. observability black-box.
-
-### 4. Graph RAG
-Reviews, tickets, and incidents are parsed into an entity-relationship graph. Queries traverse entity nodes and relationship edges — enabling reasoning like: "What engineering incidents correlate with spikes in delivery complaints?". Structured reasoning over implicit connections.
-
-### 5. Agentic RAG
-A multi-step reasoning agent decides which sources to query, in what order, and whether intermediate results warrant a follow-up retrieval. Models the diagnostic workflow of a human analyst: hypothesis → evidence → refine.
-
-### 6. Multi-Modal RAG
-Embeds and retrieves across modalities: text reviews, audio call transcripts, image attachments, structured log tables. Cross-modal alignment is the key metric challenge.
+**Why these two?** VectorRAG establishes a reproducible reference point. GraphRAG is the most architecturally distinct comparison — it changes *what* is retrieved (relationships vs. chunks), not just *how* chunks are ranked. This gives the clearest signal on whether structural understanding improves answer quality for customer review queries.
 
 ---
 
@@ -74,19 +64,17 @@ Embeds and retrieves across modalities: text reviews, audio call transcripts, im
 │                         STORAGE LAYER                                   │
 │                                                                         │
 │  PostgreSQL + pgvector    ←──  primary vector store (HNSW)              │
-│  Graph DB (Neo4j / networkx)   ←──  entity + relationship store         │
-│  BM25 Index (Elasticsearch / Tantivy) ←──  keyword search index         │
-│  Object Store (S3)        ←──  raw audio, PDFs, images                  │
+│  Graph DB (networkx / Neo4j)   ←──  entity + relationship store         │
 └─────────────────────────────────────────────────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    RAG EXECUTION LAYER                                  │
 │                                                                         │
-│  ┌──────────────┐  ┌────────────┐  ┌───────────┐  ┌─────────────────┐  │
-│  │ Baseline RAG │  │ Hybrid RAG │  │ Graph RAG │  │  Agentic RAG    │  │
-│  │ chunk→embed  │  │ BM25+vec   │  │ entity    │  │  LangGraph      │  │
-│  │ →top-K→LLM   │  │ →RRF→LLM  │  │ traversal │  │  multi-step     │  │
-│  └──────────────┘  └────────────┘  └───────────┘  └─────────────────┘  │
+│        ┌──────────────────────────┐  ┌──────────────────────────┐       │
+│        │       VectorRAG          │  │        GraphRAG          │       │
+│        │  chunk → embed → HNSW    │  │  entity-relationship     │       │
+│        │  → rerank → LLM answer   │  │  graph traversal → LLM   │       │
+│        └──────────────────────────┘  └──────────────────────────┘       │
 │                                                                         │
 │  Each system exposes: POST /api/rag/{system_type}/query                 │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -158,11 +146,8 @@ Embeds and retrieves across modalities: text reviews, audio call transcripts, im
 
 | RAG System | Additional Metric | Why |
 |------------|------------------|-----|
-| Hybrid RAG | Ranking stability (BM25 vs vector conflict rate) | Measures fusion quality |
-| Graph RAG | Edge/path accuracy, false relationship rate | Graph correctness |
-| Agentic RAG | Task success rate, planning efficiency (steps taken vs optimal) | Agent reasoning quality |
-| Multi-Modal RAG | Cross-modal alignment score | Modality mismatch detection |
-| RAG-as-a-Service | Traceability score (can you explain why this was retrieved?) | Black-box risk |
+| VectorRAG | Retrieval latency · token cost per query | Efficiency baseline for comparison |
+| GraphRAG | Edge/path accuracy · false relationship rate | Graph correctness independent of answer quality |
 
 ### Evaluation Best Practices
 
@@ -190,12 +175,8 @@ Every test query must involve at least two sources. Single-source retrieval test
 
 | System | Core Strength | Key Metric Focus | Main Weakness |
 |--------|--------------|-----------------|---------------|
-| Baseline RAG | Simplicity | Recall@K | Missing cross-source context |
-| Hybrid RAG | Better recall | Ranking stability | Retrieval conflict |
-| RAG-as-a-Service | Scalability | Traceability | Black box |
-| Graph RAG | Relational reasoning | Edge/path accuracy | False relationships |
-| Agentic RAG | Autonomy | Task success rate | Poor planning |
-| Multi-Modal RAG | Signal richness | Cross-modal alignment | Modality mismatch |
+| VectorRAG | Simplicity, speed | Faithfulness · Recall@K | Misses entity relationships |
+| GraphRAG | Relational reasoning | Context precision · Edge accuracy | Slower, graph quality-dependent |
 
 ---
 
@@ -206,8 +187,7 @@ Every test query must involve at least two sources. Single-source retrieval test
 | **LLM** | Google Gemini 2.0 Flash via OpenRouter (OpenAI-compatible) |
 | **Embeddings** | Google text-embedding-004 / benchmarked against Cohere, OpenAI |
 | **Vector Store** | PostgreSQL + pgvector (HNSW index) |
-| **Graph Store** | Neo4j / networkx (Graph RAG) |
-| **Keyword Index** | BM25 via Elasticsearch / Tantivy (Hybrid RAG) |
+| **Graph Store** | networkx / Neo4j (Graph RAG) |
 | **Agents** | LangGraph (stateful multi-agent orchestration, HITL) |
 | **Observability** | LangSmith (traces) · MLflow (experiments) |
 | **Evaluation** | RAGAS · DeepEval · custom metrics |
