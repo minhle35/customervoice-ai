@@ -15,6 +15,23 @@ from pipelines.rag.retriever import ReviewChunk, embed_query, rerank, retrieve
 # ---------------------------------------------------------------------------
 
 
+def test_encoder_singleton_not_reloaded():
+    """_get_encoder() must return the same object on repeated calls (no reload)."""
+    import pipelines.rag.retriever as mod
+
+    original = mod._encoder
+    try:
+        with patch("pipelines.rag.retriever.SentenceTransformer") as MockST:
+            MockST.return_value = MagicMock()
+            mod._encoder = None
+            first = mod._get_encoder()
+            second = mod._get_encoder()
+        assert first is second
+        assert MockST.call_count == 1
+    finally:
+        mod._encoder = original
+
+
 class TestEmbedQuery:
     def test_returns_list_of_floats(self):
         fake_vector = [0.1, 0.2, 0.3]
@@ -27,7 +44,7 @@ class TestEmbedQuery:
         assert result == fake_vector
 
     def test_uses_query_prefix(self):
-        """multilingual-e5-base requires 'query: ' prefix for retrieval queries."""
+        """requires 'query: ' prefix for retrieval queries."""
         mock_model = MagicMock()
         mock_model.encode.return_value = MagicMock(tolist=lambda: [0.0])
 
@@ -50,6 +67,17 @@ class TestEmbedQuery:
         call_kwargs = mock_model.encode.call_args[1]
         assert call_kwargs.get("normalize_embeddings") is True
 
+    def test_returns_plain_list_not_ndarray(self):
+        """Output must be a Python list — str(ndarray) breaks the pgvector CAST syntax."""
+        mock_model = MagicMock()
+        mock_model.encode.return_value = MagicMock(tolist=lambda: [0.1, 0.2, 0.3])
+
+        with patch("pipelines.rag.retriever._get_encoder", return_value=mock_model):
+            result = embed_query("test")
+
+        assert isinstance(result, list)
+        assert all(isinstance(v, float) for v in result)
+
 
 # ---------------------------------------------------------------------------
 # retrieve
@@ -57,9 +85,16 @@ class TestEmbedQuery:
 
 
 class TestRetrieve:
-    def _make_row(self, review_id=None, content="great food", author="Alice",
-                  rating=4.5, sentiment_label="positive", platform="google",
-                  similarity_score=0.85):
+    def _make_row(
+        self,
+        review_id=None,
+        content="great food",
+        author="Alice",
+        rating=4.5,
+        sentiment_label="positive",
+        platform="google",
+        similarity_score=0.85,
+    ):
         row = MagicMock()
         row.id = review_id or uuid.uuid4()
         row.content = content
@@ -190,6 +225,17 @@ class TestRerank:
             result = rerank("query", chunks, final_top_k=5)
 
         assert len(result) == 5
+
+    def test_returns_all_chunks_when_fewer_than_top_k(self):
+        """When fewer chunks exist than final_top_k, return all — do not crash."""
+        chunks = [self._make_chunk() for _ in range(2)]
+        mock_ce = MagicMock()
+        mock_ce.predict.return_value = [0.8, 0.3]
+
+        with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+            result = rerank("q", chunks, final_top_k=5)
+
+        assert len(result) == 2
 
     def test_passes_query_document_pairs_to_cross_encoder(self):
         chunks = [self._make_chunk(content=f"doc {i}") for i in range(3)]

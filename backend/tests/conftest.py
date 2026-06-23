@@ -95,6 +95,12 @@ def handlingGoogleReview():
 # ---------------------------------------------------------------------------
 
 
+@pytest.fixture()
+def mock_settings():
+    from unittest.mock import MagicMock
+    return MagicMock()
+
+
 def make_review_create(
     *,
     platform: Platform = Platform.google,
