@@ -11,13 +11,12 @@ Usage (run from repo root, with Docker DB running):
   python tests/evaluation/eval_rag.py --business-id ChIJhTEAbgFB1moRCYXM8lnO3vI
 
 Optional flags:
+  --system-type     STR   "vector" (default) or "graph" — which RAG system to evaluate
   --retrieve-top-k  INT   candidates from pgvector (default: 20)
   --rerank-top-k    INT   chunks after cross-encoder (default: 5)
-  --run-name        STR   MLflow run label (default: eval_<business_id>)
+  --run-name        STR   MLflow run label (default: eval_<system_type>_<business_id>)
 
-TODO (multi-system comparison — not yet implemented):
-  - Add --system-type flag: baseline | hybrid | graph | agentic | rag_as_service | multimodal
-  - Loop over all system types and log each as a separate MLflow run
+TODO (not yet implemented):
   - Add DeepEval metrics: HallucinationMetric, AnswerCorrectnessMetric
   - Add custom metrics: source_diversity, citation_coverage
   - Add --golden-dataset flag to specify a path other than the default
@@ -75,8 +74,7 @@ from ragas.metrics import (  # noqa: E402
 # ---------------------------------------------------------------------------
 from app.config import get_settings  # noqa: E402
 from app.database.database import get_session, init_db  # noqa: E402
-from pipelines.rag.answer_generator import generate_answer  # noqa: E402
-from pipelines.rag.retriever import embed_query, rerank, retrieve  # noqa: E402
+from pipelines.registry import get_rag_system  # noqa: E402
 
 GOLDEN_DATASET = Path(__file__).parent / "golden_dataset.json"
 
@@ -99,6 +97,7 @@ def _build_ragas_embeddings(settings):
 
 
 def _run_pipeline(
+    rag_system,
     db,
     question: str,
     business_id: str,
@@ -106,41 +105,43 @@ def _run_pipeline(
     rerank_top_k: int,
     settings,
 ):
-    """Run retrieval + rerank + generate for one question. Returns (answer, contexts)."""
-    query_vec = embed_query(question)
-    candidates = retrieve(db, query_vec, business_id, top_k=retrieve_top_k)
-
-    if not candidates:
-        return None, []
-
-    reranked = rerank(question, candidates, final_top_k=rerank_top_k)
-    contexts = [chunk.content for chunk in reranked]
-
-    answer, _ = generate_answer(
-        question=question,
-        chunks=reranked,
-        api_key=settings.openrouter_api_key,
-        base_url=settings.openrouter_base_url,
-        model=settings.openrouter_chat_model,
+    """Run the given RAG system for one question. Returns (answer, contexts)."""
+    result = rag_system(
+        db,
+        question,
+        business_id,
+        settings=settings,
+        retrieve_top_k=retrieve_top_k,
+        rerank_top_k=rerank_top_k,
         token_budget=2000,
     )
-    return answer, contexts
+
+    if not result.source_ids and not result.contexts:
+        return None, []
+
+    return result.answer, result.contexts
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--business-id", required=True)
+    parser.add_argument(
+        "--system-type",
+        choices=["vector", "graph"],
+        default="vector",
+        help="Which RAG system to evaluate",
+    )
     parser.add_argument("--retrieve-top-k", type=int, default=20)
     parser.add_argument("--rerank-top-k", type=int, default=5)
     parser.add_argument("--run-name", default=None)
     parser.add_argument(
         "--limit", type=int, default=None, help="Only run the first N golden questions"
     )
-    # TODO: add --system-type once multi-system support is implemented
     args = parser.parse_args()
 
     settings = get_settings()
-    run_name = args.run_name or f"eval_{args.business_id[:8]}"
+    run_name = args.run_name or f"eval_{args.system_type}_{args.business_id[:8]}"
+    rag_system = get_rag_system(args.system_type)
 
     golden = json.loads(GOLDEN_DATASET.read_text())
     if args.limit:
@@ -159,6 +160,7 @@ def main():
 
             print(f"  Running: {question[:70]}...")
             answer, contexts = _run_pipeline(
+                rag_system,
                 db,
                 question,
                 args.business_id,
@@ -220,6 +222,7 @@ def main():
     with mlflow.start_run(run_name=run_name):
         mlflow.log_params(
             {
+                "system_type": args.system_type,
                 "business_id": args.business_id,
                 "retrieve_top_k": args.retrieve_top_k,
                 "rerank_top_k": args.rerank_top_k,

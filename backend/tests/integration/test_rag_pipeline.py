@@ -14,8 +14,8 @@ from unittest.mock import MagicMock, patch
 
 from app.models.embedding import ReviewEmbedding
 from app.services.review_service import ReviewService
-from pipelines.rag.context_builder import build_context
-from pipelines.rag.retriever import embed_query, rerank, retrieve
+from pipelines.vector_rag.context_builder import build_context
+from pipelines.vector_rag.retriever import embed_query, rerank, retrieve
 from tests.conftest import make_review_create
 
 
@@ -103,8 +103,8 @@ class TestRetrieveRoundTrip:
         fake_vec = [0.5] * 768
         _insert_embedding(db, r.id, fake_vec)
 
-        with patch("pipelines.rag.retriever._get_encoder") as mock_enc, \
-             patch("pipelines.rag.retriever._get_cross_encoder") as mock_ce:
+        with patch("pipelines.vector_rag.retriever._get_encoder") as mock_enc, \
+             patch("pipelines.vector_rag.retriever._get_cross_encoder") as mock_ce:
 
             mock_enc.return_value.encode.return_value = MagicMock(
                 tolist=lambda: fake_vec

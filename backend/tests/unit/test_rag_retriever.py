@@ -1,4 +1,4 @@
-"""Unit tests for pipelines/rag/retriever.py."""
+"""Unit tests for pipelines/vector_rag/retriever.py."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pipelines.rag.retriever import ReviewChunk, embed_query, rerank, retrieve
+from pipelines.vector_rag.retriever import ReviewChunk, embed_query, rerank, retrieve
 
 
 # ---------------------------------------------------------------------------
@@ -17,11 +17,11 @@ from pipelines.rag.retriever import ReviewChunk, embed_query, rerank, retrieve
 
 def test_encoder_singleton_not_reloaded():
     """_get_encoder() must return the same object on repeated calls (no reload)."""
-    import pipelines.rag.retriever as mod
+    import pipelines.vector_rag.retriever as mod
 
     original = mod._encoder
     try:
-        with patch("pipelines.rag.retriever.SentenceTransformer") as MockST:
+        with patch("pipelines.vector_rag.retriever.SentenceTransformer") as MockST:
             MockST.return_value = MagicMock()
             mod._encoder = None
             first = mod._get_encoder()
@@ -38,7 +38,7 @@ class TestEmbedQuery:
         mock_model = MagicMock()
         mock_model.encode.return_value = MagicMock(tolist=lambda: fake_vector)
 
-        with patch("pipelines.rag.retriever._get_encoder", return_value=mock_model):
+        with patch("pipelines.vector_rag.retriever._get_encoder", return_value=mock_model):
             result = embed_query("what do customers complain about?")
 
         assert result == fake_vector
@@ -48,7 +48,7 @@ class TestEmbedQuery:
         mock_model = MagicMock()
         mock_model.encode.return_value = MagicMock(tolist=lambda: [0.0])
 
-        with patch("pipelines.rag.retriever._get_encoder", return_value=mock_model):
+        with patch("pipelines.vector_rag.retriever._get_encoder", return_value=mock_model):
             embed_query("some question")
 
         call_args = mock_model.encode.call_args
@@ -61,7 +61,7 @@ class TestEmbedQuery:
         mock_model = MagicMock()
         mock_model.encode.return_value = MagicMock(tolist=lambda: [0.0])
 
-        with patch("pipelines.rag.retriever._get_encoder", return_value=mock_model):
+        with patch("pipelines.vector_rag.retriever._get_encoder", return_value=mock_model):
             embed_query("test")
 
         call_kwargs = mock_model.encode.call_args[1]
@@ -72,7 +72,7 @@ class TestEmbedQuery:
         mock_model = MagicMock()
         mock_model.encode.return_value = MagicMock(tolist=lambda: [0.1, 0.2, 0.3])
 
-        with patch("pipelines.rag.retriever._get_encoder", return_value=mock_model):
+        with patch("pipelines.vector_rag.retriever._get_encoder", return_value=mock_model):
             result = embed_query("test")
 
         assert isinstance(result, list)
@@ -184,7 +184,7 @@ class TestRerank:
         mock_ce = MagicMock()
         mock_ce.predict.return_value = list(range(10))  # scores 0..9
 
-        with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+        with patch("pipelines.vector_rag.retriever._get_cross_encoder", return_value=mock_ce):
             result = rerank("query", chunks, final_top_k=3)
 
         assert len(result) == 3
@@ -195,7 +195,7 @@ class TestRerank:
         mock_ce = MagicMock()
         mock_ce.predict.return_value = scores
 
-        with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+        with patch("pipelines.vector_rag.retriever._get_cross_encoder", return_value=mock_ce):
             result = rerank("query", chunks, final_top_k=5)
 
         result_scores = [c.rerank_score for c in result]
@@ -206,7 +206,7 @@ class TestRerank:
         mock_ce = MagicMock()
         mock_ce.predict.return_value = [0.7, 0.3, 0.9]
 
-        with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+        with patch("pipelines.vector_rag.retriever._get_cross_encoder", return_value=mock_ce):
             result = rerank("query", chunks, final_top_k=3)
 
         rerank_scores = sorted([c.rerank_score for c in result], reverse=True)
@@ -221,7 +221,7 @@ class TestRerank:
         mock_ce = MagicMock()
         mock_ce.predict.return_value = list(range(20))
 
-        with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+        with patch("pipelines.vector_rag.retriever._get_cross_encoder", return_value=mock_ce):
             result = rerank("query", chunks, final_top_k=5)
 
         assert len(result) == 5
@@ -232,7 +232,7 @@ class TestRerank:
         mock_ce = MagicMock()
         mock_ce.predict.return_value = [0.8, 0.3]
 
-        with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+        with patch("pipelines.vector_rag.retriever._get_cross_encoder", return_value=mock_ce):
             result = rerank("q", chunks, final_top_k=5)
 
         assert len(result) == 2
@@ -242,7 +242,7 @@ class TestRerank:
         mock_ce = MagicMock()
         mock_ce.predict.return_value = [0.5, 0.3, 0.8]
 
-        with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+        with patch("pipelines.vector_rag.retriever._get_cross_encoder", return_value=mock_ce):
             rerank("my query", chunks, final_top_k=3)
 
         pairs = mock_ce.predict.call_args[0][0]

@@ -1,11 +1,11 @@
-"""Unit tests for pipelines/rag/context_builder.py."""
+"""Unit tests for pipelines/vector_rag/context_builder.py."""
 
 from __future__ import annotations
 
 import uuid
 
-from pipelines.rag.context_builder import _estimate_tokens, build_context
-from pipelines.rag.retriever import ReviewChunk
+from pipelines.vector_rag.context_builder import _estimate_tokens, build_context
+from pipelines.vector_rag.retriever import ReviewChunk
 
 
 def _make_chunk(

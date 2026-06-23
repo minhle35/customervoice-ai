@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pipelines.rag.retriever import ReviewChunk
+from pipelines.vector_rag.retriever import ReviewChunk
 
 # Rough approximation: 4 characters ≈ 1 token (good enough for budget enforcement)
 _CHARS_PER_TOKEN = 4
