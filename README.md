@@ -226,6 +226,37 @@ Every test query must involve at least two sources. Single-source retrieval test
 
 ---
 
+## Designed for Debuggability
+
+A wrong answer from either system is not a single failure — it's the *output* of a multi-stage pipeline, and the fix is completely different depending on which stage actually broke. This platform's architecture is built around isolating those stages, following the same per-stage diagnostic principle used in production RAG research rather than treating "the answer was wrong" as one undifferentiated bug.
+
+### The research behind it
+
+**[The RAG Triad](https://www.trulens.org/getting_started/core_concepts/rag_triad/)** (TruLens/TruEra, 2023) is the foundational framework: score **Context Relevance** (did retrieval pull back the right evidence?), **Groundedness** (does the answer logically follow from that evidence?), and **Answer Relevance** (does the final answer address the question?) *separately*. A wrong answer with high groundedness but low context relevance is a retrieval bug; high context relevance with low groundedness is a generation bug. Conflating the two and only measuring the end-to-end answer hides which stage to actually fix.
+
+**[Barnett et al., 2024, "Seven Failure Points When Engineering a Retrieval Augmented Generation System"](https://arxiv.org/abs/2401.05856)** — an empirical taxonomy from three production RAG deployments. Failure points directly relevant to this codebase: *Missing Content* (the answer isn't in the corpus — an ingestion gap, not a retrieval bug), *Missed Top-Ranked Documents* (the answer exists but didn't survive top-K — a retrieval/reranking bug), and *Not Extracted* (the right evidence was retrieved but the LLM failed to use it — a generation bug).
+
+**[Liu et al., 2023, "Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172)** ([code](https://github.com/nelson-liu/lost-in-the-middle)) — LLMs attend far more to the start/end of a prompt than the middle (U-shaped attention). A correctly retrieved, correctly reranked chunk can still be ignored if it lands in the middle of the context window — a distinct failure mode from retrieval *or* reasoning, specifically about chunk ordering.
+
+**GraphRAG failure analysis** (2026 research, including [a model-internal study of why RAG fails](https://arxiv.org/abs/2605.14192)) converges on a three-way split unique to graph-based retrieval: **extraction errors** (the LLM mis-extracts entities/relationships when building the graph — wrong triples baked in at index time, a stage VectorRAG doesn't have at all), **retrieval errors** (correct graph, but traversal follows the wrong relation or neighbor at query time), and **generation errors** (the right subgraph was retrieved, but the LLM still reasoned over it incorrectly).
+
+**GraphRAG failure taxonomy**
+(practitioner research, 2026) — three-way split: extraction errors (graph construction), retrieval errors (traversal/relation selection), generation errors (reasoning over a correct subgraph) — GraphRAG's extraction stage is the failure mode VectorRAG doesn't have.
+
+### How the codebase applies this
+
+| Stage | VectorRAG | GraphRAG |
+|---|---|---|
+| **Index/Extraction** | `pipelines/vector_rag/retriever.py::embed_query` — unit-tested in isolation against a mocked encoder | Entity/relationship extraction into the graph store — the failure mode VectorRAG structurally cannot have |
+| **Retrieval** | `retrieve()` — pgvector HNSW cosine search, tested against a *real* Postgres instance in `backend/tests/integration/test_rag_pipeline.py` so retrieval bugs show up against the actual index, not a mock | Graph traversal/relation selection — same principle once implemented: test against a real graph, not a mocked one |
+| **Reranking** | `rerank()` — cross-encoder scores are inspectable per-chunk; `backend/tests/evaluation/debug_context_precision.py` prints each of the top-5 reranked chunks with the RAGAS judge's per-chunk verdict, making it possible to see *exactly* which chunk should have ranked higher | Equivalent: which node/edge in the retrieved subgraph should have been prioritized |
+| **Generation** | RAGAS `Faithfulness` isolates "the LLM had correct evidence and still got it wrong" from retrieval/reranking failures | Same metric, same isolation — `pipelines/base.py`'s shared `RAGResult.contexts` contract means generation-stage debugging works identically for both systems |
+| **Full-pipeline tracing** | `@traceable` on `run_rag_pipeline` (`backend/app/services/rag_service.py`) sends the complete prompt → retrieval → LLM trace to LangSmith for every request, regardless of which system served it | Same decorator, same trace visibility — debugging tooling doesn't need to be rebuilt per system |
+
+This is also why `pipelines/registry.py` and the shared `RAGResult` contract matter for debugging, not just for benchmarking: because both systems return the same shape (`answer`, `contexts`, `source_ids`), a bad answer can be diagnosed with the same per-stage checklist regardless of which architecture produced it — only the *internals* of the retrieval stage differ.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
