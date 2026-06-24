@@ -7,8 +7,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
-from pipelines.rag.context_builder import build_context
-from pipelines.rag.retriever import ReviewChunk
+from pipelines.vector_rag.context_builder import build_context
+from pipelines.vector_rag.retriever import ReviewChunk
 
 _SYSTEM_PROMPT = """\
 You are a customer feedback analyst. Your job is to answer questions about a \

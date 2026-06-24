@@ -116,9 +116,9 @@ reset (e.g. in a test that replaces the module attribute), every subsequent call
 ```python
 def test_encoder_singleton_not_reloaded():
     """_get_encoder() returns same object on repeated calls (no reload)."""
-    with patch("pipelines.rag.retriever.SentenceTransformer") as MockST:
+    with patch("pipelines.vector_rag.retriever.SentenceTransformer") as MockST:
         MockST.return_value = MagicMock()
-        import pipelines.rag.retriever as mod
+        import pipelines.vector_rag.retriever as mod
         mod._encoder = None  # reset global
         first = mod._get_encoder()
         second = mod._get_encoder()
@@ -135,7 +135,7 @@ def test_embed_query_returns_plain_list_not_ndarray():
     """Output must be a Python list — str() of ndarray breaks pgvector cast."""
     mock_model = MagicMock()
     mock_model.encode.return_value = MagicMock(tolist=lambda: [0.1, 0.2, 0.3])
-    with patch("pipelines.rag.retriever._get_encoder", return_value=mock_model):
+    with patch("pipelines.vector_rag.retriever._get_encoder", return_value=mock_model):
         result = embed_query("test")
     assert isinstance(result, list)
     assert all(isinstance(v, float) for v in result)
@@ -149,7 +149,7 @@ def test_rerank_returns_all_chunks_when_fewer_than_top_k():
     chunks = [_make_chunk() for _ in range(2)]
     mock_ce = MagicMock()
     mock_ce.predict.return_value = [0.8, 0.3]
-    with patch("pipelines.rag.retriever._get_cross_encoder", return_value=mock_ce):
+    with patch("pipelines.vector_rag.retriever._get_cross_encoder", return_value=mock_ce):
         result = rerank("q", chunks, final_top_k=5)
     assert len(result) == 2
 ```
@@ -165,7 +165,7 @@ def test_llm_exception_propagates():
     chunks = [_make_chunk()]
     fake_chain = MagicMock()
     fake_chain.invoke.side_effect = RuntimeError("LLM unavailable")
-    with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+    with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
         with pytest.raises(RuntimeError, match="LLM unavailable"):
             generate_answer("q", chunks, **_LLM_KWARGS)
 ```
@@ -179,7 +179,7 @@ def test_used_chunks_order_matches_context_numbering():
     chunks = [_make_chunk(content=f"Review about topic {i}") for i in range(3)]
     fake_chain = MagicMock()
     fake_chain.invoke.return_value = "Answer [1] and [2]."
-    with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+    with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
         _, used = generate_answer("q", chunks, token_budget=10000, **_LLM_KWARGS)
     # First used chunk content should appear as [1] in what was passed to context
     invoke_kwargs = fake_chain.invoke.call_args[0][0]
@@ -268,7 +268,7 @@ def test_retrieve_returns_closest_vector(db):
     """Insert two embeddings, query closer to one — that one should rank first."""
     from app.services.review_service import ReviewService
     from app.services.embedding_service import EmbeddingService
-    from pipelines.rag.retriever import retrieve
+    from pipelines.vector_rag.retriever import retrieve
     from tests.conftest import make_review_create
 
     rs = ReviewService(db)
@@ -355,8 +355,8 @@ def test_full_pipeline_no_llm(db):
     db.flush()
 
     fake_vec = [0.5] * 768
-    with patch("pipelines.rag.retriever._get_encoder") as mock_enc, \
-         patch("pipelines.rag.retriever._get_cross_encoder") as mock_ce:
+    with patch("pipelines.vector_rag.retriever._get_encoder") as mock_enc, \
+         patch("pipelines.vector_rag.retriever._get_cross_encoder") as mock_ce:
         mock_enc.return_value.encode.return_value = MagicMock(tolist=lambda: fake_vec)
         mock_ce.return_value.predict.return_value = [0.9]
 

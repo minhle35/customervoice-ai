@@ -9,8 +9,7 @@ from uuid import UUID
 from langsmith import traceable
 from sqlalchemy.orm import Session
 from app.config import get_settings
-from pipelines.rag.answer_generator import generate_answer
-from pipelines.rag.retriever import embed_query, rerank, retrieve
+from pipelines.vector_rag import service as vector_rag
 
 # Project root must be on sys.path so `pipelines.*` is importable from the backend
 _ROOT = Path(__file__).parent.parent.parent.parent
@@ -42,27 +41,13 @@ def run_rag_pipeline(
         answer:     Grounded LLM answer with [N] citation markers.
         source_ids: List of review UUIDs used as context (for the API response).
     """
-    query_vec = embed_query(question)
-    candidates = retrieve(db, query_vec, business_id, top_k=retrieve_top_k)
-
-    if not candidates:
-        return (
-            "I don't have any reviews for this business yet. "
-            "Please ingest some reviews first.",
-            [],
-        )
-
-    reranked = rerank(question, candidates, final_top_k=rerank_top_k)
-
-    _settings = get_settings()
-    answer, used_chunks = generate_answer(
-        question=question,
-        chunks=reranked,
-        api_key=_settings.openrouter_api_key,
-        base_url=_settings.openrouter_base_url,
-        model=_settings.openrouter_chat_model,
+    result = vector_rag.run(
+        db,
+        question,
+        business_id,
+        settings=get_settings(),
+        retrieve_top_k=retrieve_top_k,
+        rerank_top_k=rerank_top_k,
         token_budget=token_budget,
     )
-
-    source_ids: list[UUID] = [chunk.review_id for chunk in used_chunks]
-    return answer, source_ids
+    return result.answer, result.source_ids

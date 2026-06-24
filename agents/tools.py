@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Optional
 from app.config import ServerSettings
 from app.models.review import Review, SentimentLabel
-from pipelines.rag.retriever import embed_query, rerank, retrieve
+from pipelines.vector_rag.retriever import embed_query, rerank, retrieve
 
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field

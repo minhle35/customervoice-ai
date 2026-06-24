@@ -1,4 +1,4 @@
-"""Unit tests for pipelines/rag/answer_generator.py."""
+"""Unit tests for pipelines/vector_rag/answer_generator.py."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pipelines.rag.answer_generator import generate_answer
-from pipelines.rag.retriever import ReviewChunk
+from pipelines.vector_rag.answer_generator import generate_answer
+from pipelines.vector_rag.retriever import ReviewChunk
 
 
 def _make_chunk(content: str = "The service was excellent.", rerank_score: float = 0.9) -> ReviewChunk:
@@ -37,7 +37,7 @@ class TestGenerateAnswer:
         fake_chain = MagicMock()
         fake_chain.invoke.return_value = "Great service according to [1]."
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
             answer, used = generate_answer("How is the service?", chunks, **_LLM_KWARGS)
 
         assert answer == "Great service according to [1]."
@@ -48,7 +48,7 @@ class TestGenerateAnswer:
         fake_chain = MagicMock()
         fake_chain.invoke.return_value = "Some answer."
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
             generate_answer("What is the waiting time?", chunks, **_LLM_KWARGS)
 
         invoke_kwargs = fake_chain.invoke.call_args[0][0]
@@ -59,7 +59,7 @@ class TestGenerateAnswer:
         fake_chain = MagicMock()
         fake_chain.invoke.return_value = "Long wait [1]."
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
             generate_answer("Wait time?", chunks, **_LLM_KWARGS)
 
         invoke_kwargs = fake_chain.invoke.call_args[0][0]
@@ -74,7 +74,7 @@ class TestGenerateAnswer:
     def test_empty_chunks_does_not_call_llm(self):
         fake_chain = MagicMock()
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
             generate_answer("Any question?", [], **_LLM_KWARGS)
 
         fake_chain.invoke.assert_not_called()
@@ -85,7 +85,7 @@ class TestGenerateAnswer:
         fake_chain = MagicMock()
         fake_chain.invoke.return_value = "Answer based on [1]."
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
             _, used = generate_answer("question", chunks, token_budget=150, **_LLM_KWARGS)
 
         assert len(used) == 1
@@ -96,7 +96,7 @@ class TestGenerateAnswer:
         fake_chain = MagicMock()
         fake_chain.invoke.side_effect = RuntimeError("LLM unavailable")
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
             with pytest.raises(RuntimeError, match="LLM unavailable"):
                 generate_answer("q", chunks, **_LLM_KWARGS)
 
@@ -106,7 +106,7 @@ class TestGenerateAnswer:
         fake_chain = MagicMock()
         fake_chain.invoke.return_value = "Answer [1] and [2]."
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain):
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain):
             _, used = generate_answer("q", chunks, token_budget=10000, **_LLM_KWARGS)
 
         invoke_kwargs = fake_chain.invoke.call_args[0][0]
@@ -118,7 +118,7 @@ class TestGenerateAnswer:
         fake_chain = MagicMock()
         fake_chain.invoke.return_value = "ok"
 
-        with patch("pipelines.rag.answer_generator._build_chain", return_value=fake_chain) as mock_build:
+        with patch("pipelines.vector_rag.answer_generator._build_chain", return_value=fake_chain) as mock_build:
             generate_answer("q", chunks, api_key="my-key", base_url="https://x.com", model="gpt-x")
 
         mock_build.assert_called_once_with(
