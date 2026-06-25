@@ -93,6 +93,19 @@ class RAGResult:
 | **Optimal query type** | Single-hop, localized fact lookups | Multi-hop reasoning, cross-document aggregation, thematic summarization |
 | **Indexing cost** | Low — one-pass embed-and-store | High — multi-pass LLM extraction, ongoing graph schema maintenance |
 
+### Key Implementation Decisions
+
+Four decisions, each with a deliberate tradeoff, shape how both systems are actually built:
+
+| Decision | Choice | Why | Tradeoff accepted |
+|---|---|---|---|
+| **Package structure** | `pipelines/vector_rag/` + `pipelines/graph_rag/` as sibling packages, registered by name in `pipelines/registry.py` | Symmetric naming matches the VectorRAG/GraphRAG framing above; makes it obvious these are interchangeable implementations of one contract, not "the real one" plus an add-on | One-time import-path churn across ~8 files during the rename |
+| **Entity/relationship extraction** | LLM-based (reusing the existing OpenRouter/LangChain setup), not a dedicated NER library | Matches Microsoft's GraphRAG paper design already cited above; zero new dependencies; NER libraries extract entities but not relationships, so an LLM step would be needed regardless | One LLM call per review at ingestion time — acceptable since ingestion is an async Celery task, not a latency-sensitive user-facing path |
+| **Graph storage** | New Postgres tables (`entities`, `entity_relationships`, FK'd to `reviews.id`) + `networkx` for in-memory traversal at query time — no dedicated graph database | Zero new infrastructure; same connection pool, backup, and transactional consistency as everything else; preserves "scientific control" for the benchmark — both systems run on identical hardware and storage engine, so a quality difference is attributable to algorithm, not database vendor | `networkx` reloads the relevant subgraph fresh per query and doesn't scale past what comfortably fits in memory — acceptable at this project's per-business scale (hundreds of reviews); revisit (Apache AGE or Neo4j) only if a real bottleneck shows up in practice |
+| **Answer generation** | One shared `generate_answer(question, contexts: list[str], ...)` used by both systems, instead of two system-specific copies | The prompt only needs a question and budget-limited citation text — it doesn't care whether that text came from review chunks or serialized graph paths. Duplicating LLM-calling/prompt logic means every future prompt tweak has to be made twice and kept in sync by hand | A small refactor of already-working VectorRAG code (and its callers) was required up front, before any GraphRAG-specific code existed |
+
+The graph-storage decision is deliberately cheap to revisit later: `pipelines/graph_rag/retriever.py`'s subgraph-loading function is the only place that would need to change to swap `networkx` for Apache AGE or Neo4j — everything above it (`service.py`, `context_builder.py`, the registry, the eval harness, all tests) only consumes the `GraphNode`/`GraphEdge`/`RAGResult` contract, never the storage engine that produced them.
+
 ---
 
 ## System Architecture
@@ -110,7 +123,7 @@ class RAGResult:
 │                         STORAGE LAYER                                   │
 │                                                                         │
 │  PostgreSQL + pgvector    ←──  primary vector store (HNSW)              │
-│  Graph DB (networkx / Neo4j)   ←──  entity + relationship store         │
+│  PostgreSQL entities/entity_relationships + networkx ←── graph store    │
 └─────────────────────────────────────────────────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -249,11 +262,24 @@ A wrong answer from either system is not a single failure — it's the *output* 
 |---|---|---|
 | **Index/Extraction** | `pipelines/vector_rag/retriever.py::embed_query` — unit-tested in isolation against a mocked encoder | Entity/relationship extraction into the graph store — the failure mode VectorRAG structurally cannot have |
 | **Retrieval** | `retrieve()` — pgvector HNSW cosine search, tested against a *real* Postgres instance in `backend/tests/integration/test_rag_pipeline.py` so retrieval bugs show up against the actual index, not a mock | Graph traversal/relation selection — same principle once implemented: test against a real graph, not a mocked one |
-| **Reranking** | `rerank()` — cross-encoder scores are inspectable per-chunk; `backend/tests/evaluation/debug_context_precision.py` prints each of the top-5 reranked chunks with the RAGAS judge's per-chunk verdict, making it possible to see *exactly* which chunk should have ranked higher | Equivalent: which node/edge in the retrieved subgraph should have been prioritized |
+| **Reranking** | `rerank()` — cross-encoder scores are inspectable per-chunk; `backend/tests/evaluation/debug_eval_rag.py` prints each of the top-5 reranked chunks with the RAGAS judge's per-chunk verdict, making it possible to see *exactly* which chunk should have ranked higher | Equivalent: which node/edge in the retrieved subgraph should have been prioritized |
 | **Generation** | RAGAS `Faithfulness` isolates "the LLM had correct evidence and still got it wrong" from retrieval/reranking failures | Same metric, same isolation — `pipelines/base.py`'s shared `RAGResult.contexts` contract means generation-stage debugging works identically for both systems |
 | **Full-pipeline tracing** | `@traceable` on `run_rag_pipeline` (`backend/app/services/rag_service.py`) sends the complete prompt → retrieval → LLM trace to LangSmith for every request, regardless of which system served it | Same decorator, same trace visibility — debugging tooling doesn't need to be rebuilt per system |
 
 This is also why `pipelines/registry.py` and the shared `RAGResult` contract matter for debugging, not just for benchmarking: because both systems return the same shape (`answer`, `contexts`, `source_ids`), a bad answer can be diagnosed with the same per-stage checklist regardless of which architecture produced it — only the *internals* of the retrieval stage differ.
+
+### From manual debugging to automated self-correction
+
+Everything above is a human-in-the-loop workflow: a developer runs `eval_rag.py` or `debug_eval_rag.py`, reads the output, and decides what to fix. The natural next step is closing that loop automatically — when a metric fails its threshold (`eval_rag.py`'s existing `THRESHOLDS` dict), have the system request a new answer itself rather than just reporting failure. There's a meaningful skill progression in *how* that retry is implemented:
+
+
+**1. Feedback-conditioned regeneration.** A blind retry can fail the same way twice. Following [Shinn et al., 2023, "Reflexion: Language Agents with Verbal Reinforcement Learning"](https://arxiv.org/abs/2303.11366) ([code](https://github.com/noahshinn/reflexion)) — verbal feedback from a failed attempt fed back into the next attempt's prompt, with no model retraining required — capture *why* the metric failed (e.g., the Faithfulness judge's stated `reason`, or which specific chunk `NoiseSensitivity`/`ContextPrecision` flagged as unhelpful) and inject it as an explicit correction instruction into the next `generate_answer` call: *"Your previous answer included claims not supported by the reviews below: \<reason\>. Regenerate using only what these reviews actually say."* This requires extending `generate_answer`'s prompt template to accept optional prior-attempt feedback, but reuses every other part of the pipeline unchanged.
+
+**2. Stage-aware corrective routing.** Not every failure should be fixed by regenerating the answer. Following [Gu et al., 2024, "Corrective Retrieval Augmented Generation" (CRAG)](https://arxiv.org/abs/2401.15884) ([code](https://github.com/HuskyInSalt/CRAG)) and [Asai et al., 2023, "Self-RAG"](https://arxiv.org/abs/2310.11511), route the corrective action based on *which* metric failed — using exactly the stage table above:
+   - **Low Context Precision/Recall** (a retrieval-stage failure) → don't regenerate with the same context at all. Re-retrieve first: widen `retrieve_top_k`, adjust `rerank_top_k`, or — once GraphRAG exists — fall back to the other system entirely via `pipelines.registry.get_rag_system()`, since the shared `RAGResult` contract makes that swap a one-line change. Only regenerate once the context itself has actually improved.
+   - **Low Faithfulness / high Noise Sensitivity** (a generation-stage failure) → the context was fine; drop the specific chunks flagged "not useful" by `ContextPrecision`'s per-chunk verdicts (exactly what `debug_eval_rag.py` already computes) and regenerate from the trimmed context, with Reflexion-style feedback layered on top.
+   - Every attempt — including which corrective action fired and why — flows through the existing `@traceable` decorator on `run_rag_pipeline`, so the retry history is auditable in LangSmith, not a silent black box.
+   - A hard circuit breaker (cap total attempts, e.g. 3) falls back to an explicit "could not produce a grounded answer after N corrective attempts" message — the same honest-failure pattern already used for "no reviews ingested yet" in `pipelines/vector_rag/service.py` — rather than looping indefinitely or silently returning a low-quality answer.
 
 ---
 
@@ -264,7 +290,7 @@ This is also why `pipelines/registry.py` and the shared `RAGResult` contract mat
 | **LLM** | Google Gemini 2.0 Flash via OpenRouter (OpenAI-compatible) |
 | **Embeddings** | Google text-embedding-004 / benchmarked against Cohere, OpenAI |
 | **Vector Store** | PostgreSQL + pgvector (HNSW index) |
-| **Graph Store** | networkx / Neo4j (Graph RAG) |
+| **Graph Store** | PostgreSQL (`entities`/`entity_relationships` tables) + networkx (in-memory traversal) |
 | **Agents** | LangGraph (stateful multi-agent orchestration, HITL) |
 | **Observability** | LangSmith (traces) · MLflow (experiments) |
 | **Evaluation** | RAGAS · DeepEval · custom metrics |
