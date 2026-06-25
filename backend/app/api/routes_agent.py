@@ -4,9 +4,16 @@ Endpoints:
   POST /api/agent/ask                   — invoke the agent for a new message
   POST /api/agent/{thread_id}/approve   — resume a paused ingestion (approved)
   POST /api/agent/{thread_id}/reject    — resume a paused ingestion (rejected)
+  POST /api/agent/tools/search          — direct call to the search_reviews tool
+  GET  /api/agent/tools/sentiment-summary — direct call to get_sentiment_summary
+  POST /api/agent/tools/ingest          — direct call to trigger_ingestion
 
 The graph instance is built per-request (db is request-scoped). MemorySaver
 holds in-process state — swap for PostgresSaver for cross-restart persistence.
+
+The /tools/* endpoints call the same agent tool functions (agents/tools.py)
+used by the LangGraph nodes, but bypass intent classification — useful for
+callers (e.g. the MCP server) that already know which tool they want.
 """
 
 from __future__ import annotations
@@ -51,6 +58,22 @@ class AgentResponse(BaseModel):
     answer: str
     thread_id: str
     pending_approval: bool = False
+
+
+class SearchReviewsRequest(BaseModel):
+    query: str = Field(description="Natural language question about customer reviews")
+    business_id: str = Field(description="Business to scope the search to")
+    top_k: int = Field(default=5, ge=1, le=20, description="Number of reviews to return")
+
+
+class TriggerIngestionRequest(BaseModel):
+    platform: str = Field(description="Platform to ingest from: 'google', 'reddit', or 'facebook'")
+    business_id: str = Field(description="Business to ingest reviews for")
+    business_url: str = Field(description="URL or search query identifying the business on the platform")
+
+
+class ToolResult(BaseModel):
+    result: str
 
 
 
@@ -187,4 +210,75 @@ def reject_ingestion(thread_id: str, db: SessionDep, settings: SettingsDep):
         ) from exc
 
     return AgentResponse(answer=answer, thread_id=thread_id)
+
+
+# ---------------------------------------------------------------------------
+# Direct tool endpoints — thin wrappers around agents/tools.py, bypassing
+# intent classification. Used by the MCP server when the caller already
+# knows which tool it wants.
+# ---------------------------------------------------------------------------
+
+
+@router.post("/tools/search", response_model=ToolResult)
+def search_reviews_tool(request: SearchReviewsRequest, db: SessionDep, settings: SettingsDep):
+    """Two-stage RAG retrieval: pgvector HNSW search -> cross-encoder rerank."""
+    from agents.tools import build_tools  # noqa: PLC0415
+
+    try:
+        tools = build_tools(db, request.business_id, settings)
+        search_reviews = next(t for t in tools if t.name == "search_reviews")
+        result = search_reviews.invoke({"query": request.query, "top_k": request.top_k})
+    except Exception as exc:
+        logger.error("search_reviews tool error: %s", exc, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="search_reviews tool failed.",
+        ) from exc
+
+    return ToolResult(result=result)
+
+
+@router.get("/tools/sentiment-summary", response_model=ToolResult)
+def sentiment_summary_tool(
+    business_id: str,
+    db: SessionDep,
+    settings: SettingsDep,
+    platform: str | None = None,
+):
+    """Sentiment distribution + average rating + platform breakdown for a business."""
+    from agents.tools import build_tools  # noqa: PLC0415
+
+    try:
+        tools = build_tools(db, business_id, settings)
+        get_sentiment_summary = next(t for t in tools if t.name == "get_sentiment_summary")
+        result = get_sentiment_summary.invoke({"platform": platform})
+    except Exception as exc:
+        logger.error("get_sentiment_summary tool error: %s", exc, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="get_sentiment_summary tool failed.",
+        ) from exc
+
+    return ToolResult(result=result)
+
+
+@router.post("/tools/ingest", response_model=ToolResult)
+def trigger_ingestion_tool(request: TriggerIngestionRequest, db: SessionDep, settings: SettingsDep):
+    """Queue a Celery ingestion job for the given platform and business."""
+    from agents.tools import build_tools  # noqa: PLC0415
+
+    try:
+        tools = build_tools(db, request.business_id, settings)
+        trigger_ingestion = next(t for t in tools if t.name == "trigger_ingestion")
+        result = trigger_ingestion.invoke(
+            {"platform": request.platform, "business_url": request.business_url}
+        )
+    except Exception as exc:
+        logger.error("trigger_ingestion tool error: %s", exc, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="trigger_ingestion tool failed.",
+        ) from exc
+
+    return ToolResult(result=result)
 
