@@ -90,7 +90,11 @@ def get_sentiment_summary(business_id: Optional[str] = None, platform: Optional[
 
 @mcp.tool()
 def trigger_ingestion(platform: str, business_url: str, business_id: Optional[str] = None) -> str:
-    """Queue a Celery job to fetch reviews from Google/Reddit/Facebook into the background worker."""
+    """Queue a Celery job to fetch MORE reviews for a business ALREADY in the system.
+
+    Requires an existing business_id (call list_businesses to find it). For a
+    business that has never been ingested before, use search_new_business +
+    onboard_business instead — that flow derives the business_id for you."""
     business_id = _resolve_business_id(business_id)
     data = _request(
         "POST",
@@ -98,6 +102,43 @@ def trigger_ingestion(platform: str, business_url: str, business_id: Optional[st
         json={"platform": platform, "business_id": business_id, "business_url": business_url},
     )
     return data["result"]
+
+
+@mcp.tool()
+def search_new_business(query: str, country: str = "us", limit: int = 5) -> list[dict]:
+    """Search Google Maps for a business that is NOT yet in the system.
+
+    Returns up to `limit` candidates with a data_id (and place_id when available)
+    — pass the chosen result straight to onboard_business to start ingesting its
+    reviews. Use this when the user names a business that list_businesses doesn't
+    show."""
+    return _request(
+        "GET",
+        "/api/integrations/google/search",
+        params={"q": query, "country": country, "limit": limit},
+    )
+
+
+@mcp.tool()
+def onboard_business(
+    data_id: str, place_id: Optional[str] = None, max_reviews: int = 10
+) -> dict:
+    """Start ingesting Google reviews for a business that has no business_id yet.
+
+    Pass the data_id (and place_id if present) from a search_new_business result.
+    max_reviews caps how many reviews the worker scrapes (default 10) so a single
+    onboarding call stays fast — raise it for a deeper backfill once the business
+    is confirmed correct. The backend derives the business_id (preferring
+    place_id) and queues the ingestion job — poll the returned task_id via
+    /api/integrations/tasks/{task_id}."""
+    params = {"data_id": data_id}
+    if place_id:
+        params["place_id"] = place_id
+    return _request(
+        "POST",
+        "/api/integrations/google",
+        json={"platform": "google", "max_reviews": max_reviews, "params": params},
+    )
 
 
 # ---------------------------------------------------------------------------
