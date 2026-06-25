@@ -44,7 +44,7 @@ def _resolve_business_id(business_id: Optional[str]) -> str:
     return business_id
 
 
-def _request(method: str, path: str, **kwargs) -> dict:
+def _request(method: str, path: str, **kwargs):
     resp = httpx.request(method, f"{API_URL}{path}", headers=_headers(), timeout=60, **kwargs)
     resp.raise_for_status()
     return resp.json()
@@ -53,6 +53,16 @@ def _request(method: str, path: str, **kwargs) -> dict:
 # ---------------------------------------------------------------------------
 # Direct tools — single backend call, no LLM intent classification
 # ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def list_businesses() -> list[dict]:
+    """List every business that has ingested reviews, with its business_id and name.
+
+    Call this first when the user asks about a business by name, or asks how many
+    businesses there are — the other tools only operate on one business_id at a
+    time and don't enumerate businesses themselves."""
+    return _request("GET", "/api/reviews/businesses")
 
 
 @mcp.tool()
