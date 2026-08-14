@@ -113,14 +113,21 @@ def intent_node(state: AgentState, settings: ServerSettings) -> dict:
         max_tokens=200,
     )
 
-    # with_structured_output wraps the LLM call with JSON-schema enforcement
-    classifier = llm.with_structured_output(IntentClassification)
+    # with_structured_output wraps the LLM call with JSON-schema enforcement.
+    # method="json_schema": this model supports OpenRouter's structured-output
+    # response_format, not tool-calling — the default method 404s ("No
+    # endpoints found that support tool use").
+    classifier = llm.with_structured_output(IntentClassification, method="json_schema")
     messages = [
         SystemMessage(content=_SYSTEM_PROMPT),
         HumanMessage(content=query),
     ]
-    result: IntentClassification = classifier.invoke(messages)
-
+    raw_result = classifier.invoke(messages)
+    result = (
+        raw_result
+        if isinstance(raw_result, IntentClassification)
+        else IntentClassification.model_validate(raw_result)
+    )
     return {
         "intent": result.intent,
         "intent_confidence": result.confidence,
