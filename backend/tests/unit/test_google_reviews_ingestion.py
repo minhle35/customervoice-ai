@@ -193,7 +193,7 @@ class TestFetchGoogleReviews:
             ),
         ):
             mock_settings.return_value.google_reviews_api_key = "test-key"
-            reviews = fetch_google_reviews("biz-1", {})
+            reviews = fetch_google_reviews("biz-1", {"place_name": "Test Business"})
 
         assert reviews[0].author == "Charlie"
         assert reviews[1].author == "Dana"
@@ -217,7 +217,7 @@ class TestFetchGoogleReviews:
             ),
         ):
             mock_settings.return_value.google_reviews_api_key = "test-key"
-            reviews = fetch_google_reviews("biz-1", {})
+            reviews = fetch_google_reviews("biz-1", {"place_name": "Test Business"})
 
         assert reviews[0].content == "Nice"
         assert reviews[1].content == "Loved it"
@@ -245,7 +245,7 @@ class TestFetchGoogleReviews:
             ),
         ):
             mock_settings.return_value.google_reviews_api_key = "test-key"
-            reviews = fetch_google_reviews("biz-1", {})
+            reviews = fetch_google_reviews("biz-1", {"place_name": "Test Business"})
 
         assert len(reviews) == 1
         assert reviews[0].author == "Alice"
@@ -267,7 +267,7 @@ class TestFetchGoogleReviews:
             ),
         ):
             mock_settings.return_value.google_reviews_api_key = "test-key"
-            reviews = fetch_google_reviews("biz-1", {})
+            reviews = fetch_google_reviews("biz-1", {"place_name": "Test Business"})
 
         assert len(reviews) == 1
         assert len(reviews[0].platform_id) == 32  # sha256 hex[:32]
@@ -294,7 +294,7 @@ class TestFetchGoogleReviews:
             ),
         ):
             mock_settings.return_value.google_reviews_api_key = "test-key"
-            reviews = fetch_google_reviews("biz-1", {})
+            reviews = fetch_google_reviews("biz-1", {"place_name": "Test Business"})
 
         assert reviews[0].rating is None
 

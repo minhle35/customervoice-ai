@@ -72,14 +72,20 @@ export interface PlaceResult {
   reviews_count: number | null
 }
 
-export function searchPlaces(query: string, country: string): Promise<PlaceResult[]> {
-  const qs = new URLSearchParams({ q: query, country })
+export function searchPlaces(query: string, country: string, limit: number): Promise<PlaceResult[]> {
+  const qs = new URLSearchParams({ q: query, country, limit: String(limit) })
   return apiFetch<PlaceResult[]>(`/integrations/google/search?${qs}`)
 }
 
 export function triggerIngestion(
   platform: string,
-  payload: { platform: string; business_id?: string; params: Record<string, string | number> }
+  payload: {
+    platform: string
+    business_id?: string
+    business_name?: string
+    max_reviews?: number
+    params: Record<string, string | number>
+  }
 ): Promise<{ status: string; task_id: string }> {
   return apiFetch<{ status: string; task_id: string }>(`/integrations/${platform}`, {
     method: 'POST',

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import enum
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import (
     ARRAY,
@@ -18,8 +18,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
-
-import enum
+from app.models.embedding import ReviewEmbedding
 
 
 class Platform(str, enum.Enum):
@@ -50,24 +49,24 @@ class Review(Base):
 
     # Business / location this review targets
     business_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    business_name: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    business_name: Mapped[str] = mapped_column(String(512), nullable=False)
 
     # Review content
-    author: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    rating: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # 1-5 or None
+    author: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True)  # 1-5 or None
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    published_at: Mapped[Optional[datetime]] = mapped_column(
+    published_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
     # AI-enriched fields (populated after processing)
-    sentiment_score: Mapped[Optional[float]] = mapped_column(
+    sentiment_score: Mapped[float | None] = mapped_column(
         Float, nullable=True
     )  # -1.0 to 1.0
-    sentiment_label: Mapped[Optional[SentimentLabel]] = mapped_column(
+    sentiment_label: Mapped[SentimentLabel | None] = mapped_column(
         Enum(SentimentLabel, name="sentiment_label_enum"), nullable=True
     )
-    topics: Mapped[Optional[list[str]]] = mapped_column(ARRAY(String), nullable=True)
+    topics: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
 
     # Processing state
     is_processed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -84,7 +83,7 @@ class Review(Base):
     )
 
     # Relationships
-    embedding: Mapped[Optional["ReviewEmbedding"]] = relationship(
+    embedding: Mapped[ReviewEmbedding | None] = relationship(
         "ReviewEmbedding",
         back_populates="review",
         uselist=False,
