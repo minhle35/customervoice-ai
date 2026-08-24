@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.models.review import Platform, SentimentLabel
 
-
 # ---------------------------------------------------------------------------
 # Request schemas
 # ---------------------------------------------------------------------------
@@ -16,11 +15,11 @@ class ReviewCreate(BaseModel):
     platform: Platform
     platform_id: str = Field(..., min_length=1, max_length=255)
     business_id: str = Field(..., min_length=1, max_length=255)
-    business_name: Optional[str] = Field(None, max_length=512)
-    author: Optional[str] = Field(None, max_length=255)
-    rating: Optional[float] = Field(None, ge=1.0, le=5.0)
+    business_name: str = Field(..., max_length=512)
+    author: str | None = Field(None, max_length=255)
+    rating: float | None = Field(None, ge=1.0, le=5.0)
     content: str = Field(..., min_length=1)
-    published_at: Optional[datetime] = None
+    published_at: datetime | None = None
 
     @field_validator("content")
     @classmethod
@@ -31,10 +30,10 @@ class ReviewCreate(BaseModel):
 
 
 class ReviewUpdate(BaseModel):
-    sentiment_score: Optional[float] = Field(None, ge=-1.0, le=1.0)
-    sentiment_label: Optional[SentimentLabel] = None
-    topics: Optional[list[str]] = None
-    is_processed: Optional[bool] = None
+    sentiment_score: float | None = Field(None, ge=-1.0, le=1.0)
+    sentiment_label: SentimentLabel | None = None
+    topics: list[str] | None = None
+    is_processed: bool | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -49,14 +48,14 @@ class ReviewOut(BaseModel):
     platform: Platform
     platform_id: str
     business_id: str
-    business_name: Optional[str]
-    author: Optional[str]
-    rating: Optional[float]
+    business_name: str | None
+    author: str | None
+    rating: float | None
     content: str
-    published_at: Optional[datetime]
-    sentiment_score: Optional[float]
-    sentiment_label: Optional[SentimentLabel]
-    topics: Optional[list[str]]
+    published_at: datetime | None
+    sentiment_score: float | None
+    sentiment_label: SentimentLabel | None
+    topics: list[str] | None
     is_processed: bool
     created_at: datetime
     updated_at: datetime
@@ -78,5 +77,12 @@ class ReviewListOut(BaseModel):
 class IngestRequest(BaseModel):
     platform: Platform
     business_id: str | None = Field(None, min_length=1, max_length=255)
+    business_name: str | None = Field(None, min_length=1, max_length=512)
+    max_reviews: int = Field(
+        10,
+        ge=1,
+        le=500,
+        description="Cap on total reviews fetched, to bound worker runtime",
+    )
     # Platform-specific query params passed through to the ingestion pipeline
     params: dict = Field(default_factory=dict)

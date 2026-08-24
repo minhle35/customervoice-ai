@@ -43,12 +43,15 @@ class SerpApiService:
         if not self._api_key:
             raise ValueError("GOOGLE_REVIEWS_API_KEY is not set")
 
-    async def search_places(self, query: str, country: str = "us") -> list[PlaceResult]:
+    async def search_places(
+        self, query: str, country: str = "us", limit: int = _MAX_CANDIDATES
+    ) -> list[PlaceResult]:
         """Search Google Maps for a business by name.
 
-        Returns up to _MAX_CANDIDATES results, each with a data_id
-        that can be used to fetch reviews via the ingestion pipeline.
+        Returns up to `limit` results (capped at _MAX_CANDIDATES), each with a
+        data_id that can be used to fetch reviews via the ingestion pipeline.
         """
+        limit = min(limit, _MAX_CANDIDATES)
         try:
             response = await self._client.get(
                 _SEARCH_PATH,
@@ -89,7 +92,7 @@ class SerpApiService:
             )
 
         # List of local results
-        for item in payload.get("local_results", [])[:_MAX_CANDIDATES]:
+        for item in payload.get("local_results", [])[:limit]:
             data_id = item.get("data_id")
             if not data_id:
                 continue
@@ -104,7 +107,7 @@ class SerpApiService:
                 )
             )
 
-        return results[:_MAX_CANDIDATES]
+        return results[:limit]
 
     async def resolve_data_id(self, query: str, country: str = "us") -> str | None:
         """Return the data_id of the top Google Maps match for a business name."""

@@ -22,6 +22,15 @@ class GoogleHandler(PlatformHandler):
             )
         return bid
 
+    def derive_business_name(self, params: dict) -> str:
+        name = params.get("business_name")
+        if not name:
+            raise ValueError(
+                "Google ingestion pipeline requires business name in params. "
+            )
+        return name
+
     def fetch_reviews(self, business_id: str, params: dict) -> list[ReviewCreate]:
         from pipelines.ingestion.google_reviews_ingestion import fetch_google_reviews
+
         return fetch_google_reviews(business_id, params)

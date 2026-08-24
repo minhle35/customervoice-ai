@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def mock_celery(mocker):
@@ -33,49 +33,77 @@ def mock_reprocess(mocker):
 # POST /api/integrations/{platform}
 # ---------------------------------------------------------------------------
 
+
 class TestTriggerIngestion:
     def test_valid_google_request_returns_queued(self, client, mock_celery):
-        resp = client.post("/api/integrations/google", json={
-            "platform": "google",
-            "params": {"data_id": "0x123abc"},
-        })
+        resp = client.post(
+            "/api/integrations/google",
+            json={
+                "platform": "google",
+                "business_name": "Test Business",
+                "params": {"data_id": "0x123abc"},
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["status"] == "queued"
         assert resp.json()["task_id"] == "test-task-id-123"
 
     def test_unsupported_platform_returns_422(self, client):
-        resp = client.post("/api/integrations/tiktok", json={
-            "platform": "tiktok",
-            "params": {},
-        })
+        resp = client.post(
+            "/api/integrations/tiktok",
+            json={
+                "platform": "tiktok",
+                "params": {},
+            },
+        )
         assert resp.status_code == 422
 
     def test_missing_data_id_and_place_id_returns_422(self, client, mock_celery):
-        resp = client.post("/api/integrations/google", json={
-            "platform": "google",
-            "params": {},
-        })
+        resp = client.post(
+            "/api/integrations/google",
+            json={
+                "platform": "google",
+                "params": {},
+            },
+        )
         assert resp.status_code == 422
 
     def test_place_id_accepted_as_business_id(self, client, mock_celery):
-        resp = client.post("/api/integrations/google", json={
-            "platform": "google",
-            "params": {"place_id": "ChIJ123"},
-        })
+        resp = client.post(
+            "/api/integrations/google",
+            json={
+                "platform": "google",
+                "business_name": "Test Business",
+                "params": {"place_id": "ChIJ123"},
+            },
+        )
         assert resp.status_code == 200
 
     def test_celery_called_with_correct_args(self, client, mock_celery):
-        client.post("/api/integrations/google", json={
-            "platform": "google",
-            "params": {"data_id": "0x123abc"},
-        })
-        mock_celery.assert_called_once_with("google", "0x123abc", {"data_id": "0x123abc"})
+        client.post(
+            "/api/integrations/google",
+            json={
+                "platform": "google",
+                "business_name": "Test Business",
+                "params": {"data_id": "0x123abc"},
+            },
+        )
+        mock_celery.assert_called_once_with(
+            "google",
+            "0x123abc",
+            {"data_id": "0x123abc", "place_name": "Test Business", "max_reviews": 10},
+        )
 
     def test_max_reviews_forwarded_in_params(self, client, mock_celery):
-        client.post("/api/integrations/google", json={
-            "platform": "google",
-            "params": {"data_id": "0x123", "max_reviews": 50},
-        })
+        client.post(
+            "/api/integrations/google",
+            json={
+                "platform": "google",
+                "business_name": "Test Business",
+                "max_reviews": 50,
+                "params": {"data_id": "0x123"},
+            },
+        )
         _, _, params = mock_celery.call_args[0]
         assert params["max_reviews"] == 50
 
@@ -83,6 +111,7 @@ class TestTriggerIngestion:
 # ---------------------------------------------------------------------------
 # GET /api/integrations/tasks/{task_id}
 # ---------------------------------------------------------------------------
+
 
 class TestGetTaskStatus:
     def test_pending_task(self, client, mocker):
@@ -131,6 +160,7 @@ class TestGetTaskStatus:
 # ---------------------------------------------------------------------------
 # POST /api/integrations/reprocess
 # ---------------------------------------------------------------------------
+
 
 class TestReprocess:
     def test_queues_task_and_returns_task_id(self, client, mock_reprocess):

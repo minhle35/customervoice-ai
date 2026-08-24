@@ -32,6 +32,7 @@ export function DataPipelineStarter({ onStarted }: Props) {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [results, setResults] = useState<PlaceResult[] | null>(null)
   const [selected, setSelected] = useState<PlaceResult | null>(null)
+  const [limit, setLimit] = useState(5)
   const [maxReviews, setMaxReviews] = useState(100)
   const [ingesting, setIngesting] = useState(false)
   const [ingestError, setIngestError] = useState<string | null>(null)
@@ -43,7 +44,7 @@ export function DataPipelineStarter({ onStarted }: Props) {
     setSelected(null)
     setSearching(true)
     try {
-      const places = await searchPlaces(query.trim(), country)
+      const places = await searchPlaces(query.trim(), country, limit)
       setResults(places)
       if (places.length === 0) setSearchError('No businesses found. Try a different name or country.')
     } catch (err) {
@@ -60,11 +61,11 @@ export function DataPipelineStarter({ onStarted }: Props) {
     try {
       const { task_id } = await triggerIngestion('google', {
         platform: 'google',
+        business_name: selected.title,
+        max_reviews: maxReviews,
         params: {
           data_id: selected.data_id,
           ...(selected.place_id ? { place_id: selected.place_id } : {}),
-          place_name: selected.title,
-          max_reviews: maxReviews,
         },
       })
       onStarted(task_id)
@@ -111,7 +112,7 @@ export function DataPipelineStarter({ onStarted }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="e.g. Bien Vinh Hao 2 Seafood Restaurant"
-            className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            className="flex-1 max-w-sm px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
           />
           <select
             value={country}
@@ -122,6 +123,36 @@ export function DataPipelineStarter({ onStarted }: Props) {
               <option key={c.code} value={c.code}>{c.label}</option>
             ))}
           </select>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800">
+            <label htmlFor="result-limit" className="text-xs text-slate-400 whitespace-nowrap">
+              Results
+            </label>
+            <div className="flex items-center rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setLimit((v) => Math.max(1, v - 1))}
+                className="px-2 py-1 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors text-sm select-none"
+              >
+                −
+              </button>
+              <input
+                id="result-limit"
+                type="number"
+                min={1}
+                max={10}
+                value={limit}
+                onChange={(e) => setLimit(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                className="w-10 py-1 bg-transparent text-sm text-slate-200 text-center focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <button
+                type="button"
+                onClick={() => setLimit((v) => Math.min(10, v + 1))}
+                className="px-2 py-1 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors text-sm select-none"
+              >
+                +
+              </button>
+            </div>
+          </div>
           <button
             type="submit"
             disabled={searching}

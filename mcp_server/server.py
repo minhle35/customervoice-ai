@@ -121,23 +121,28 @@ def search_new_business(query: str, country: str = "us", limit: int = 5) -> list
 
 @mcp.tool()
 def onboard_business(
-    data_id: str, place_id: Optional[str] = None, max_reviews: int = 10
+    data_id: str, business_name: str, place_id: Optional[str] = None, max_reviews: int = 10
 ) -> dict:
     """Start ingesting Google reviews for a business that has no business_id yet.
 
-    Pass the data_id (and place_id if present) from a search_new_business result.
-    max_reviews caps how many reviews the worker scrapes (default 10) so a single
-    onboarding call stays fast — raise it for a deeper backfill once the business
-    is confirmed correct. The backend derives the business_id (preferring
-    place_id) and queues the ingestion job — poll the returned task_id via
-    /api/integrations/tasks/{task_id}."""
+    Pass the data_id, title (as business_name), and place_id (if present) from a
+    search_new_business result. max_reviews caps how many reviews the worker
+    scrapes (default 10) so a single onboarding call stays fast — raise it for a
+    deeper backfill once the business is confirmed correct. The backend derives
+    the business_id (preferring place_id) and queues the ingestion job — poll
+    the returned task_id via /api/integrations/tasks/{task_id}."""
     params = {"data_id": data_id}
     if place_id:
         params["place_id"] = place_id
     return _request(
         "POST",
         "/api/integrations/google",
-        json={"platform": "google", "max_reviews": max_reviews, "params": params},
+        json={
+            "platform": "google",
+            "business_name": business_name,
+            "max_reviews": max_reviews,
+            "params": params,
+        },
     )
 
 

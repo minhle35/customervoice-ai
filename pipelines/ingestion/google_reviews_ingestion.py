@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from typing import Any
 
 import httpx
-
 from app.config import get_settings
 from app.models.review import Platform
 from app.schemas.review_schema import ReviewCreate
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 SERPAPI_ENDPOINT = "https://serpapi.com/search.json"
 DEFAULT_MAX_REVIEWS = 100
-PAGE_DELAY_SECONDS = 1.0  # respectful delay between SerpAPI pages
+PAGE_DELAY_SECONDS = 1.0  #  delay between SerpAPI pages
 
 
 def _stable_id(*parts: str) -> str:
@@ -57,6 +56,10 @@ def _parse_reviews_from_page(
             continue
 
         rating = item.get("rating")
+        # Reviews aggregated from third-party sites (e.g. Priceline via Google's
+        # "reviews from the web") use a 10-point scale instead of Google's 1-5.
+        if rating is not None and rating > 5:
+            rating = rating / 2
         published_at = _parse_datetime(
             item.get("iso_date")
             or item.get("iso_date_of_last_edit")
@@ -133,14 +136,35 @@ def fetch_google_reviews(business_id: str, params: dict) -> list[ReviewCreate]:
                 max_reviews,
             )
 
-            response = client.get(SERPAPI_ENDPOINT, params=query_params)
-            try:
-                response.raise_for_status()
-            except httpx.HTTPStatusError as exc:
-                # Re-raise without the request URL to avoid leaking the api_key.
-                raise RuntimeError(
-                    f"SerpAPI returned {exc.response.status_code} on page {page}: {exc.response.text}"
-                ) from None
+            # Retry this single page a few times on transient network errors before
+            # giving up — letting the exception propagate would trigger Celery's
+            # task-level autoretry, which re-runs this whole function from page 1
+            # and throws away every review already collected.
+            response = None
+            for attempt in range(1, 4):
+                try:
+                    response = client.get(SERPAPI_ENDPOINT, params=query_params)
+                    response.raise_for_status()
+                    break
+                except httpx.HTTPStatusError as exc:
+                    # Re-raise without the request URL to avoid leaking the api_key.
+                    raise RuntimeError(
+                        f"SerpAPI returned {exc.response.status_code} on page {page}: {exc.response.text}"
+                    ) from None
+                except httpx.TimeoutException:
+                    if attempt == 3:
+                        logger.warning(
+                            "Page %d timed out after %d attempts — returning %d reviews "
+                            "collected so far instead of failing the whole fetch.",
+                            page,
+                            attempt,
+                            len(all_reviews),
+                        )
+                        return all_reviews[:max_reviews]
+                    logger.info(
+                        "Page %d timed out (attempt %d/3), retrying", page, attempt
+                    )
+                    time.sleep(PAGE_DELAY_SECONDS * attempt)
 
             payload = response.json()
             page_reviews = _parse_reviews_from_page(payload, business_id, place_name)
