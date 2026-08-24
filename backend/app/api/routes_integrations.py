@@ -41,6 +41,9 @@ async def search_google_places(
     client: SerpClientDep,
     q: str = Query(..., description="Business name to search"),
     country: str = Query("us", description="Two-letter country code, e.g. vn, au, us"),
+    limit: int = Query(
+        5, ge=1, le=10, description="Max number of candidates to return"
+    ),
 ):
     """Search Google Maps for a business and return candidates with their data_id.
 
@@ -48,7 +51,7 @@ async def search_google_places(
     """
     try:
         return await SerpApiService(client=client).search_places(
-            query=q, country=country
+            query=q, country=country, limit=limit
         )
     except RuntimeError as exc:
         logger.error("SerpAPI search failed: %s", exc)
@@ -83,7 +86,7 @@ def reprocess_unprocessed(limit: int = 100):
 def trigger_ingestion(platform: str, payload: IngestRequest):
     if platform not in SUPPORTED_PLATFORMS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unsupported platform '{platform}'. Supported: {SUPPORTED_PLATFORMS}",
         )
 
@@ -92,10 +95,19 @@ def trigger_ingestion(platform: str, payload: IngestRequest):
         business_id = handler.derive_business_id(
             {"place_id": payload.business_id, **payload.params}
         )
+        business_name = payload.business_name
+        if not business_name:
+            raise ValueError("No business name provided in /api/integration/{platform}")
+
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
 
-    task = ingest_platform.delay(payload.platform.value, business_id, payload.params)
+    params = {
+        **payload.params,
+        "place_name": business_name,
+        "max_reviews": payload.max_reviews,
+    }
+    task = ingest_platform.delay(payload.platform.value, business_id, params)
     return {"status": "queued", "task_id": task.id}
