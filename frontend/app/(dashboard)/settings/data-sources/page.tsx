@@ -15,7 +15,7 @@ export default function DataSourcesPage() {
         subtitle="Configure and run review ingestion pipelines"
       />
 
-      <div className="p-6 max-w-2xl space-y-6">
+      <div className="p-6 space-y-6">
         {taskId ? (
           <DataPipeline taskId={taskId} onReset={() => setTaskId(null)} />
         ) : (
