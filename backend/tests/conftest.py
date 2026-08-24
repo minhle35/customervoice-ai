@@ -73,11 +73,17 @@ def db(db_engine):
 
 @pytest.fixture()
 def client(db):
+    from unittest.mock import patch
+
     from app.database.database import get_db
     from app.main import app
+    from app.services.scope_guard import ScopeCheck
 
     app.dependency_overrides[get_db] = lambda: db
-    with TestClient(app, raise_server_exceptions=True) as c:
+    in_scope = ScopeCheck(in_scope=True, reason="test — scope guard mocked")
+    with patch("app.api.routes_chat.check_in_scope", return_value=in_scope), \
+         patch("app.api.routes_agent.check_in_scope", return_value=in_scope), \
+         TestClient(app, raise_server_exceptions=True) as c:
         yield c
     app.dependency_overrides.clear()
 
