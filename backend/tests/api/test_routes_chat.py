@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.database.database import get_db
+from app.services.scope_guard import ScopeCheck
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -29,7 +30,9 @@ def _fake_db():
 @pytest.fixture()
 def client():
     app.dependency_overrides[get_db] = lambda: MagicMock()
-    yield TestClient(app)
+    in_scope = ScopeCheck(in_scope=True, reason="test — scope guard mocked")
+    with patch("app.api.routes_chat.check_in_scope", return_value=in_scope):
+        yield TestClient(app)
     app.dependency_overrides.clear()
 
 

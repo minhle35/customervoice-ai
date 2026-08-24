@@ -16,7 +16,7 @@ used by the LangGraph nodes, but bypass intent classification — useful for
 callers (e.g. the MCP server) that already know which tool they want.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 import sys
 import uuid
@@ -28,6 +28,7 @@ from langgraph.checkpoint.memory import MemorySaver as _MemorySaver
 from app.database import SessionDep
 from app.config import SettingsDep
 from app.logger import get_logger
+from app.services.scope_guard import REFUSAL_MESSAGE, check_in_scope
 
 _ROOT = Path(__file__).parent.parent.parent.parent
 _BACKEND = _ROOT / "backend"
@@ -63,18 +64,23 @@ class AgentResponse(BaseModel):
 class SearchReviewsRequest(BaseModel):
     query: str = Field(description="Natural language question about customer reviews")
     business_id: str = Field(description="Business to scope the search to")
-    top_k: int = Field(default=5, ge=1, le=20, description="Number of reviews to return")
+    top_k: int = Field(
+        default=5, ge=1, le=20, description="Number of reviews to return"
+    )
 
 
 class TriggerIngestionRequest(BaseModel):
-    platform: str = Field(description="Platform to ingest from: 'google', 'reddit', or 'facebook'")
+    platform: str = Field(
+        description="Platform to ingest from: 'google', 'reddit', or 'facebook'"
+    )
     business_id: str = Field(description="Business to ingest reviews for")
-    business_url: str = Field(description="URL or search query identifying the business on the platform")
+    business_url: str = Field(
+        description="URL or search query identifying the business on the platform"
+    )
 
 
 class ToolResult(BaseModel):
     result: str
-
 
 
 # ---------------------------------------------------------------------------
@@ -97,17 +103,31 @@ def _get_graph(db, settings):
         sys.path.insert(0, str(_ROOT))
 
     # Rebuild with shared checkpointer so thread state persists across requests
-    from langgraph.graph import StateGraph, START, END  # noqa: PLC0415
-    from agents.nodes.ingestion import clarification_node, ingestion_node  # noqa: PLC0415
+    from langgraph.graph import END, START, StateGraph  # noqa: PLC0415
+
+    from agents.nodes.ingestion import (  # noqa: PLC0415
+        clarification_node,
+        ingestion_node,
+    )
     from agents.nodes.insight import insight_node  # noqa: PLC0415
     from agents.nodes.intent import intent_node, route_intent  # noqa: PLC0415
     from agents.nodes.rag import rag_node  # noqa: PLC0415
     from agents.state import AgentState  # noqa: PLC0415
 
     builder = StateGraph(AgentState)
-    builder.add_node("intent_classifier", lambda s: intent_node(s, settings))
-    builder.add_node("rag", lambda s: rag_node(s, db, settings))
-    builder.add_node("insight", lambda s: insight_node(s, db, settings))
+    # Wrap node constructors to match expected callable signature
+    builder.add_node(
+        "intent_classifier",
+        lambda state, config=None, store=None: intent_node(state, settings),
+    )
+    builder.add_node(
+        "rag",
+        lambda state, config=None, store=None: rag_node(state, db, settings),
+    )
+    builder.add_node(
+        "insight",
+        lambda state, config=None, store=None: insight_node(state, db, settings),
+    )
     builder.add_node("ingestion", ingestion_node)
     builder.add_node("clarification", clarification_node)
     builder.add_edge(START, "intent_classifier")
@@ -143,6 +163,12 @@ def ask_agent(request: AgentAskRequest, db: SessionDep, settings: SettingsDep):
     a pending_approval=True response. The client must call /approve or /reject.
     """
     from agents.graph import run_agent  # noqa: PLC0415
+
+    scope = check_in_scope(request.question, settings)
+    if not scope.in_scope:
+        return AgentResponse(
+            answer=REFUSAL_MESSAGE, thread_id=request.thread_id, pending_approval=False
+        )
 
     try:
         graph = _get_graph(db, settings)
@@ -220,9 +246,15 @@ def reject_ingestion(thread_id: str, db: SessionDep, settings: SettingsDep):
 
 
 @router.post("/tools/search", response_model=ToolResult)
-def search_reviews_tool(request: SearchReviewsRequest, db: SessionDep, settings: SettingsDep):
+def search_reviews_tool(
+    request: SearchReviewsRequest, db: SessionDep, settings: SettingsDep
+):
     """Two-stage RAG retrieval: pgvector HNSW search -> cross-encoder rerank."""
     from agents.tools import build_tools  # noqa: PLC0415
+
+    scope = check_in_scope(request.query, settings)
+    if not scope.in_scope:
+        return ToolResult(result=REFUSAL_MESSAGE)
 
     try:
         tools = build_tools(db, request.business_id, settings)
@@ -250,7 +282,9 @@ def sentiment_summary_tool(
 
     try:
         tools = build_tools(db, business_id, settings)
-        get_sentiment_summary = next(t for t in tools if t.name == "get_sentiment_summary")
+        get_sentiment_summary = next(
+            t for t in tools if t.name == "get_sentiment_summary"
+        )
         result = get_sentiment_summary.invoke({"platform": platform})
     except Exception as exc:
         logger.error("get_sentiment_summary tool error: %s", exc, exc_info=True)
@@ -263,7 +297,9 @@ def sentiment_summary_tool(
 
 
 @router.post("/tools/ingest", response_model=ToolResult)
-def trigger_ingestion_tool(request: TriggerIngestionRequest, db: SessionDep, settings: SettingsDep):
+def trigger_ingestion_tool(
+    request: TriggerIngestionRequest, db: SessionDep, settings: SettingsDep
+):
     """Queue a Celery ingestion job for the given platform and business."""
     from agents.tools import build_tools  # noqa: PLC0415
 
@@ -281,4 +317,3 @@ def trigger_ingestion_tool(request: TriggerIngestionRequest, db: SessionDep, set
         ) from exc
 
     return ToolResult(result=result)
-

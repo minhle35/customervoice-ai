@@ -2,11 +2,13 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, status
 
+from app.config import SettingsDep
 from app.database import SessionDep
 from app.logger import get_logger
 from app.schemas.insight_schema import ChatHistoryMessage, ChatRequest, ChatResponse
 from app.services.chat_service import ChatService
 from app.services.rag_service import run_rag_pipeline
+from app.services.scope_guard import REFUSAL_MESSAGE, check_in_scope
 
 logger = get_logger(__name__)
 
@@ -35,7 +37,7 @@ def get_chat_history(business_id: str, db: SessionDep) -> list[ChatHistoryMessag
 
 
 @router.post("", response_model=ChatResponse, summary="POST /api/chat")
-def chat(request: ChatRequest, db: SessionDep) -> ChatResponse:
+def chat(request: ChatRequest, db: SessionDep, settings: SettingsDep) -> ChatResponse:
     """Answer a business question grounded in customer review data.
 
     - Embeds the latest user message with `query:` prefix (multilingual-e5-base)
@@ -52,6 +54,10 @@ def chat(request: ChatRequest, db: SessionDep) -> ChatResponse:
         )
 
     question = user_messages[-1].content
+
+    scope = check_in_scope(question, settings)
+    if not scope.in_scope:
+        return ChatResponse(answer=REFUSAL_MESSAGE, sources=[])
 
     try:
         answer, source_ids = run_rag_pipeline(
