@@ -22,8 +22,7 @@ from typing import Literal
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-from pydantic import BaseModel, Field
-from pydantic import SecretStr
+from pydantic import BaseModel, Field, SecretStr
 
 _ROOT = Path(__file__).parent.parent.parent
 _BACKEND = _ROOT / "backend"
@@ -31,9 +30,9 @@ for _p in [str(_ROOT), str(_BACKEND)]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from agents.state import AgentState
 from app.config import ServerSettings
 
+from agents.state import AgentState
 
 # ---------------------------------------------------------------------------
 # Structured output schema — the LLM must return exactly this shape
