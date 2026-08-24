@@ -86,7 +86,26 @@ def check_in_scope(text: str, settings: ServerSettings) -> ScopeCheck:
         SystemMessage(content=_SYSTEM_PROMPT),
         HumanMessage(content=text),
     ]
-    result: ScopeCheck = classifier.invoke(messages)
+    try:
+        raw_result = classifier.invoke(messages)
+
+    except Exception as e:
+        logger.warning("scope_guard check failed: %s", e, exc_info=True)
+        result = ScopeCheck(in_scope=False, reason="Error during scope check")
+
+    else:
+        if isinstance(raw_result, ScopeCheck):
+            result = raw_result
+        else:
+            try:
+                result = ScopeCheck.model_validate(raw_result)
+            except Exception as e:
+                logger.warning(
+                    "scope_guard returned unparseable result: %s", e, exc_info=True
+                )
+                result = ScopeCheck(
+                    in_scope=False, reason="Classifier returned an unparseable result."
+                )
 
     logger.info(
         "scope_guard: in_scope=%s reason=%r text=%r",
