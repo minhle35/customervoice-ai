@@ -14,7 +14,8 @@ Intent taxonomy:
   clarification — ambiguous; agent asks a follow-up question
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
+from app.logger import get_logger
 
 import sys
 from pathlib import Path
@@ -34,6 +35,7 @@ from app.config import ServerSettings
 
 from agents.state import AgentState
 
+logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Structured output schema — the LLM must return exactly this shape
 # ---------------------------------------------------------------------------
@@ -121,12 +123,39 @@ def intent_node(state: AgentState, settings: ServerSettings) -> dict:
         SystemMessage(content=_SYSTEM_PROMPT),
         HumanMessage(content=query),
     ]
-    raw_result = classifier.invoke(messages)
-    result = (
-        raw_result
-        if isinstance(raw_result, IntentClassification)
-        else IntentClassification.model_validate(raw_result)
-    )
+    try:
+        raw_result = classifier.invoke(messages)
+    except Exception as e:
+        logger.warning(
+            "Intent classifier returned unparseable result: %s",
+            e,
+            exc_info=True,
+        )
+        result = IntentClassification(
+            intent="clarification",
+            confidence=0.0,
+            reasoning="Classifier returned an unexpected result type.",
+        )
+
+    else:
+        if isinstance(raw_result, IntentClassification):
+            result = raw_result
+
+        else:
+            try:
+                result = IntentClassification.model_validate(raw_result)
+            except Exception as e:
+                logger.warning(
+                    "Intent Classification returned unparsable result: %s",
+                    e,
+                    exc_info=True,
+                )
+                result = IntentClassification(
+                    intent="clarification",
+                    confidence=0.0,
+                    reasoning="Classifier returned an unparsable result.",
+                )
+
     return {
         "intent": result.intent,
         "intent_confidence": result.confidence,
