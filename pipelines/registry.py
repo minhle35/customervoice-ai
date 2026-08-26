@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from pipelines.base import RAGResult
 from pipelines.graph_rag import service as graph_rag

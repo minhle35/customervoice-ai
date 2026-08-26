@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, patch
 
 from app.models.embedding import ReviewEmbedding
 from app.services.review_service import ReviewService
+
 from pipelines.vector_rag.context_builder import build_context
 from pipelines.vector_rag.retriever import embed_query, rerank, retrieve
 from tests.conftest import make_review_create
@@ -31,14 +32,18 @@ class TestRetrieveRoundTrip:
         """The embedding closest to the query vector must rank first."""
         rs = ReviewService(db)
 
-        r1 = rs.upsert_review(make_review_create(content="Excellent food", business_id="biz-A"))
-        r2 = rs.upsert_review(make_review_create(
-            platform_id="pid-2", content="Terrible service", business_id="biz-A"
-        ))
+        r1 = rs.upsert_review(
+            make_review_create(content="Excellent food", business_id="biz-A")
+        )
+        r2 = rs.upsert_review(
+            make_review_create(
+                platform_id="pid-2", content="Terrible service", business_id="biz-A"
+            )
+        )
 
-        vec_r1 = [1.0] + [0.0] * 767      # unit vector in dim 0
+        vec_r1 = [1.0] + [0.0] * 767  # unit vector in dim 0
         vec_r2 = [0.0, 1.0] + [0.0] * 766  # unit vector in dim 1
-        query_vec = [0.99] + [0.0] * 767   # almost identical to vec_r1
+        query_vec = [0.99] + [0.0] * 767  # almost identical to vec_r1
 
         _insert_embedding(db, r1.id, vec_r1)
         _insert_embedding(db, r2.id, vec_r2)
@@ -53,12 +58,16 @@ class TestRetrieveRoundTrip:
         """Reviews from a different business must never appear in results."""
         rs = ReviewService(db)
 
-        r_a = rs.upsert_review(make_review_create(
-            platform_id="pa", business_id="biz-A", content="Review A"
-        ))
-        r_b = rs.upsert_review(make_review_create(
-            platform_id="pb", business_id="biz-B", content="Review B"
-        ))
+        r_a = rs.upsert_review(
+            make_review_create(
+                platform_id="pa", business_id="biz-A", content="Review A"
+            )
+        )
+        r_b = rs.upsert_review(
+            make_review_create(
+                platform_id="pb", business_id="biz-B", content="Review B"
+            )
+        )
 
         identical_vec = [1.0] + [0.0] * 767
         _insert_embedding(db, r_a.id, identical_vec)
@@ -75,11 +84,13 @@ class TestRetrieveRoundTrip:
         rs = ReviewService(db)
 
         for i in range(10):
-            r = rs.upsert_review(make_review_create(
-                platform_id=f"topk-{i}",
-                content=f"Review {i}",
-                business_id="biz-topk",
-            ))
+            r = rs.upsert_review(
+                make_review_create(
+                    platform_id=f"topk-{i}",
+                    content=f"Review {i}",
+                    business_id="biz-topk",
+                )
+            )
             _insert_embedding(db, r.id, [float(i) / 10] + [0.0] * 767)
 
         results = retrieve(db, [0.5] + [0.0] * 767, "biz-topk", top_k=3)
@@ -95,17 +106,20 @@ class TestRetrieveRoundTrip:
         """embed(mocked) → retrieve(real pgvector) → rerank(mocked) → build_context."""
         rs = ReviewService(db)
 
-        r = rs.upsert_review(make_review_create(
-            platform_id="dim-sum-1",
-            content="Amazing dim sum",
-            business_id="biz-C",
-        ))
+        r = rs.upsert_review(
+            make_review_create(
+                platform_id="dim-sum-1",
+                content="Amazing dim sum",
+                business_id="biz-C",
+            )
+        )
         fake_vec = [0.5] * 768
         _insert_embedding(db, r.id, fake_vec)
 
-        with patch("pipelines.vector_rag.retriever._get_encoder") as mock_enc, \
-             patch("pipelines.vector_rag.retriever._get_cross_encoder") as mock_ce:
-
+        with (
+            patch("pipelines.vector_rag.retriever._get_encoder") as mock_enc,
+            patch("pipelines.vector_rag.retriever._get_cross_encoder") as mock_ce,
+        ):
             mock_enc.return_value.encode.return_value = MagicMock(
                 tolist=lambda: fake_vec
             )
@@ -114,7 +128,7 @@ class TestRetrieveRoundTrip:
             query_vec = embed_query("dim sum quality")
             candidates = retrieve(db, query_vec, "biz-C", top_k=20)
             reranked = rerank("dim sum quality", candidates, final_top_k=5)
-            context, used = build_context(reranked)
+            context, _ = build_context(reranked)
 
         assert len(candidates) == 1
         assert len(reranked) == 1

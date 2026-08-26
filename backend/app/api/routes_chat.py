@@ -64,6 +64,7 @@ def chat(request: ChatRequest, db: SessionDep, settings: SettingsDep) -> ChatRes
             db=db,
             question=question,
             business_id=request.business_id,
+            system_type=request.system_type,
         )
     except Exception as exc:
         logger.error(

@@ -97,6 +97,25 @@ class ReviewService:
         )
         return list(result.scalars().all())
 
+    def get_reviews_pending_graph_extraction(self, limit: int = 100) -> list[Review]:
+        """Fetch sentiment/embedding-processed reviews awaiting GraphRAG extraction.
+
+        Requires is_processed=True — extraction reads review.content, which
+        is already available at that point, but gating on is_processed keeps
+        this stage strictly after (and independent of) the sentiment/
+        embedding stage rather than racing it.
+        """
+        result = self.db.execute(
+            select(Review)
+            .where(
+                Review.is_processed == True,  # noqa: E712
+                Review.graph_extracted == False,  # noqa: E712
+            )
+            .order_by(Review.created_at.asc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
     def get_reviews(
         self,
         business_id: Optional[str] = None,
@@ -139,4 +158,7 @@ class ReviewService:
             .distinct(Review.business_id)
             .order_by(Review.business_id)
         ).all()
-        return [{"business_id": r.business_id, "business_name": r.business_name} for r in rows]
+        return [
+            {"business_id": r.business_id, "business_name": r.business_name}
+            for r in rows
+        ]

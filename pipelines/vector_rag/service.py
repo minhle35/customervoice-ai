@@ -1,12 +1,13 @@
 """VectorRAG orchestration: embed → retrieve → rerank → answer."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 from sqlalchemy.orm import Session
 
 from app.config import ServerSettings
+from pipelines.answer_generator import generate_answer
 from pipelines.base import RAGResult
-from pipelines.vector_rag.answer_generator import generate_answer
+from pipelines.vector_rag.context_builder import build_context
 from pipelines.vector_rag.retriever import embed_query, rerank, retrieve
 
 
@@ -45,14 +46,21 @@ def run(
         )
 
     reranked = rerank(question, candidates, final_top_k=rerank_top_k)
+    context_text, used_chunks = build_context(reranked, token_budget=token_budget)
 
-    answer, used_chunks = generate_answer(
+    if not used_chunks:
+        return RAGResult(
+            answer="I couldn't find any relevant reviews to answer your question.",
+            contexts=[],
+            source_ids=[],
+        )
+
+    answer = generate_answer(
         question=question,
-        chunks=reranked,
+        context=context_text,
         api_key=settings.openrouter_api_key,
         base_url=settings.openrouter_base_url,
         model=settings.openrouter_chat_model,
-        token_budget=token_budget,
     )
 
     return RAGResult(

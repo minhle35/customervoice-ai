@@ -45,6 +45,13 @@ class GraphNode:
 class GraphEdge:
     source: str
     target: str
+    # Previously omitted — for a graph result, relation_type is the single
+    # most informative attribute of an edge (what connects source to
+    # target), and dropping it left visualization/debugging with only
+    # source/target ids and a bare weight, no actual graph semantics. Made
+    # required (no default) since an edge without it isn't meaningful.
+    relation_type: str
+    review_id: UUID | None = None
     weight: float | None = None
 
 
