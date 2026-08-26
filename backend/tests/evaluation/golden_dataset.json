@@ -1,6 +1,7 @@
 [
   {
     "question": "What do customers say about the food quality?",
+    "type": "aggregation",
     "ground_truth": "Customers generally praise the food quality, mentioning specific dishes positively and describing flavours as good value for money.",
     "expected_signals": ["food quality", "dishes", "flavour"],
     "min_faithfulness": 0.7,
@@ -8,6 +9,7 @@
   },
   {
     "question": "What are the most common complaints from customers?",
+    "type": "aggregation",
     "ground_truth": "Common complaints include limited vegetarian options, wait times, or specific menu items that did not meet expectations.",
     "expected_signals": ["complaint", "wait", "vegetarian"],
     "min_faithfulness": 0.7,
@@ -15,6 +17,7 @@
   },
   {
     "question": "How do customers rate the service?",
+    "type": "aggregation",
     "ground_truth": "Customers comment on service quality, mentioning staff friendliness, wait times, and attentiveness.",
     "expected_signals": ["service", "staff", "friendly"],
     "min_faithfulness": 0.7,
@@ -22,6 +25,7 @@
   },
   {
     "question": "Which dishes are mentioned most positively in reviews?",
+    "type": "aggregation",
     "ground_truth": "Specific dishes such as chicken karaage, curry, or sandos are highlighted positively by reviewers.",
     "expected_signals": ["dish", "positive", "recommend"],
     "min_faithfulness": 0.7,
@@ -29,6 +33,7 @@
   },
   {
     "question": "Is the restaurant considered good value for money?",
+    "type": "simple_fact",
     "ground_truth": "Reviewers generally consider the restaurant worth the price given the food quality and portion sizes.",
     "expected_signals": ["value", "price", "worth"],
     "min_faithfulness": 0.7,
@@ -36,6 +41,7 @@
   },
   {
     "question": "What do customers say about the restaurant atmosphere?",
+    "type": "semantic",
     "ground_truth": "Customers describe the atmosphere in terms of noise level, decor, seating comfort, and overall vibe.",
     "expected_signals": ["atmosphere", "vibe", "ambiance"],
     "min_faithfulness": 0.7,
@@ -43,6 +49,7 @@
   },
   {
     "question": "Are there any recurring issues with wait times?",
+    "type": "aggregation",
     "ground_truth": "Some reviewers mention wait times for food or seating, indicating this may be an area for improvement.",
     "expected_signals": ["wait", "slow", "queue"],
     "min_faithfulness": 0.7,
@@ -50,6 +57,7 @@
   },
   {
     "question": "How accessible is the restaurant for people with dietary restrictions?",
+    "type": "simple_fact",
     "ground_truth": "Reviews mention limited options for vegetarians or people with dietary restrictions.",
     "expected_signals": ["vegetarian", "vegan", "dietary", "gluten"],
     "min_faithfulness": 0.7,
@@ -57,6 +65,7 @@
   },
   {
     "question": "What do customers say about portion sizes?",
+    "type": "aggregation",
     "ground_truth": "Reviewers comment on portion sizes being generous or insufficient relative to the price paid.",
     "expected_signals": ["portion", "size", "quantity"],
     "min_faithfulness": 0.7,
@@ -64,6 +73,7 @@
   },
   {
     "question": "How do customers describe the cleanliness of the restaurant?",
+    "type": "semantic",
     "ground_truth": "Customers mention cleanliness of the dining area, kitchen visibility, and hygiene standards of staff.",
     "expected_signals": ["clean", "hygiene", "tidy"],
     "min_faithfulness": 0.7,
@@ -71,6 +81,7 @@
   },
   {
     "question": "Do customers recommend this restaurant to others?",
+    "type": "simple_fact",
     "ground_truth": "Many reviews explicitly recommend the restaurant to friends and family, citing food quality and overall experience.",
     "expected_signals": ["recommend", "return", "bring friends"],
     "min_faithfulness": 0.7,
@@ -78,6 +89,7 @@
   },
   {
     "question": "What do customers say about the drinks or beverage selection?",
+    "type": "aggregation",
     "ground_truth": "Reviewers mention drinks selection, quality of coffee or tea, and availability of alcoholic beverages.",
     "expected_signals": ["drinks", "coffee", "beverage", "alcohol"],
     "min_faithfulness": 0.7,
@@ -85,6 +97,7 @@
   },
   {
     "question": "Are there any mentions of parking or location convenience?",
+    "type": "simple_fact",
     "ground_truth": "Some reviews mention difficulty parking nearby or praise the convenient public transport access.",
     "expected_signals": ["parking", "location", "transport", "accessible"],
     "min_faithfulness": 0.7,
@@ -92,6 +105,7 @@
   },
   {
     "question": "What do repeat visitors say about their experiences?",
+    "type": "aggregation",
     "ground_truth": "Repeat customers mention consistency of food quality and service, and their intention to return.",
     "expected_signals": ["again", "return", "regular", "every time"],
     "min_faithfulness": 0.7,
@@ -99,6 +113,7 @@
   },
   {
     "question": "How do customers compare this restaurant to similar places?",
+    "type": "comparison",
     "ground_truth": "Some reviewers compare the restaurant favourably or unfavourably to other restaurants in the area.",
     "expected_signals": ["better than", "compared to", "other restaurant"],
     "min_faithfulness": 0.7,
@@ -106,6 +121,7 @@
   },
   {
     "question": "What do customers say about the online ordering or delivery experience?",
+    "type": "aggregation",
     "ground_truth": "Reviews mention ease of online ordering, delivery speed, and packaging quality for takeaway orders.",
     "expected_signals": ["delivery", "online", "takeaway", "packaging"],
     "min_faithfulness": 0.7,
@@ -113,6 +129,7 @@
   },
   {
     "question": "Are there any specific staff members praised by customers?",
+    "type": "entity",
     "ground_truth": "Some reviewers name or describe specific staff members who provided exceptional service.",
     "expected_signals": ["staff", "server", "friendly", "helpful"],
     "min_faithfulness": 0.7,
@@ -120,6 +137,7 @@
   },
   {
     "question": "What do customers say about reservations or booking experience?",
+    "type": "aggregation",
     "ground_truth": "Reviewers comment on ease of making reservations, responsiveness to booking requests, and table availability.",
     "expected_signals": ["reservation", "booking", "table", "availability"],
     "min_faithfulness": 0.7,
@@ -127,6 +145,7 @@
   },
   {
     "question": "What do customers say about the noise level inside the restaurant?",
+    "type": "semantic",
     "ground_truth": "Customers describe the noise level as either lively and energetic or too loud for conversation.",
     "expected_signals": ["noise", "loud", "quiet", "conversation"],
     "min_faithfulness": 0.7,
@@ -134,9 +153,34 @@
   },
   {
     "question": "How do customers describe their overall dining experience?",
+    "type": "broad",
     "ground_truth": "Overall, customers describe their dining experience in terms of food, service, atmosphere, and value combined.",
     "expected_signals": ["overall", "experience", "definitely", "enjoyed"],
     "min_faithfulness": 0.7,
     "min_context_recall": 0.5
+  },
+  {
+    "question": "Did any customers complain about the parking situation?",
+    "type": "negation",
+    "ground_truth": "No — parking is generally described positively across reviews, with reviewers noting it is plentiful and easy to find; no parking complaints were found.",
+    "expected_signals": ["parking", "easy", "plentiful", "no complaint"],
+    "min_faithfulness": 0.7,
+    "min_context_recall": 0.4
+  },
+  {
+    "question": "How did staff respond when a customer raised an issue with their order?",
+    "type": "relationship",
+    "ground_truth": "At least one review describes staff not appearing sincere when apologising for a drink issue, taking a long time to address it, and only explaining afterward that they had run out of ingredients.",
+    "expected_signals": ["staff", "apolog", "drink", "complain"],
+    "min_faithfulness": 0.7,
+    "min_context_recall": 0.4
+  },
+  {
+    "question": "Did customers' experiences change between an initial visit and a repeat visit to the same restaurant?",
+    "type": "temporal",
+    "ground_truth": "At least one reviewer described their first visit as very positive, but a repeat visit saw a decline — a smaller portion, weaker broth, and less comfortable seating compared to the first time.",
+    "expected_signals": ["first time", "second", "return", "disappoint"],
+    "min_faithfulness": 0.7,
+    "min_context_recall": 0.4
   }
 ]
