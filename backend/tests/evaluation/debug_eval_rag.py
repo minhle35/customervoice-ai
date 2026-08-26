@@ -61,6 +61,8 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(_ROOT / ".env", override=False)
 
+from app.config import get_settings  # noqa: E402
+from app.database.database import get_session, init_db  # noqa: E402
 from langchain_openai import ChatOpenAI  # noqa: E402
 from pydantic import SecretStr  # noqa: E402
 from ragas.llms import LangchainLLMWrapper  # noqa: E402
@@ -73,9 +75,8 @@ from ragas.metrics import (  # noqa: E402
 from ragas.metrics._context_precision import QAC, Verification  # noqa: E402
 from ragas.metrics.base import ensembler  # noqa: E402
 
-from app.config import get_settings  # noqa: E402
-from app.database.database import get_session, init_db  # noqa: E402
-from pipelines.vector_rag.answer_generator import generate_answer  # noqa: E402
+from pipelines.answer_generator import generate_answer  # noqa: E402
+from pipelines.vector_rag.context_builder import build_context  # noqa: E402
 from pipelines.vector_rag.retriever import embed_query, rerank, retrieve  # noqa: E402
 
 GOLDEN_DATASET = Path(__file__).parent / "golden_dataset.json"
@@ -305,18 +306,18 @@ async def run_all(args, golden, settings):
             _log("rerank: cross-encoder scoring...")
             reranked = rerank(question, candidates, final_top_k=5)
             _log("rerank: done")
-            contexts = [chunk.content for chunk in reranked]
+            context_text, used_chunks = build_context(reranked, token_budget=2000)
+            contexts = [chunk.content for chunk in used_chunks]
 
             _log(
                 "generate_answer: calling LLM (blocking, sync call inside async loop)..."
             )
-            answer, _used_chunks = generate_answer(
+            answer = generate_answer(
                 question=question,
-                chunks=reranked,
+                context=context_text,
                 api_key=settings.openrouter_api_key,
                 base_url=settings.openrouter_base_url,
                 model=settings.openrouter_chat_model,
-                token_budget=2000,
             )
             _log("generate_answer: done")
 

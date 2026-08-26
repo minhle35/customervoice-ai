@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 import time
 
-from openai import RateLimitError
-
 from app.config import get_settings
 from app.database.database import (
     get_session,
@@ -14,7 +12,10 @@ from app.models.review import Platform, Review
 from app.schemas.review_schema import ReviewCreate, ReviewUpdate
 from app.services.embedding_service import EmbeddingService
 from app.services.review_service import ReviewService
+from openai import RateLimitError
+
 from pipelines.embeddings.generate_embeddings import generate_embedding
+from pipelines.graph_rag.extractor import extract_and_persist
 from pipelines.processing.clean_reviews import clean_review_text
 from pipelines.processing.sentiment_analysis import analyze_sentiment_and_topics
 
@@ -238,3 +239,58 @@ def process_unprocessed(limit: int = 100) -> dict:
                 break
 
     return {"total": total, "processed": processed, "rate_limited": rate_limited}
+
+
+# ---------------------------------------------------------------------------
+# GraphRAG indexing — entity/relationship extraction
+# ---------------------------------------------------------------------------
+#
+# Deliberately a separate stage from _process_reviews above, not folded into
+# _process_single_review. That loop already sleeps 3s/review to stay under
+# the ~20 RPM free-tier LLM limit for the sentiment call; adding a second
+# LLM call (entity extraction) to the same loop would either double
+# ingestion time or blow the rate limit. Keeping it separate also lets
+# GraphRAG indexing be (re)run independently of VectorRAG's pipeline —
+# useful since GraphRAG didn't exist when earlier reviews were ingested
+# (see backend/scripts/backfill_graph_extraction.py).
+
+
+def extract_unprocessed_graph_entities(limit: int = 100) -> dict:
+    """Run GraphRAG entity/relationship extraction for reviews awaiting it.
+
+    Mirrors process_unprocessed()'s resumable-batch shape: stops early on
+    RateLimitError, leaving remaining reviews with graph_extracted=False for
+    the next run to pick up.
+    """
+    settings = get_settings()
+    processed = 0
+    rate_limited = 0
+    triples_stored = 0
+
+    with get_session() as db:
+        review_service = ReviewService(db)
+        pending = review_service.get_reviews_pending_graph_extraction(limit=limit)
+        total = len(pending)
+
+        for review in pending:
+            try:
+                triples_stored += extract_and_persist(db, review, settings)
+                db.commit()
+                processed += 1
+                time.sleep(3)  # same free-tier LLM budget as sentiment analysis
+            except RateLimitError:
+                db.rollback()
+                rate_limited += 1
+                logger.warning(
+                    "Rate limited — stopping early. %d review(s) left unextracted; "
+                    "run extract_unprocessed_graph_entities again to finish.",
+                    total - processed - rate_limited,
+                )
+                break
+
+    return {
+        "total": total,
+        "processed": processed,
+        "rate_limited": rate_limited,
+        "triples_stored": triples_stored,
+    }

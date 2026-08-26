@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -11,16 +11,17 @@ from app.models.insight import InsightType
 # Response schemas
 # ---------------------------------------------------------------------------
 
+
 class InsightOut(BaseModel):
     id: UUID
     insight_type: InsightType
     business_id: str
-    platform: Optional[str]
+    platform: str | None
     period_start: date
     period_end: date
     title: str
     content: str
-    extra_data: Optional[dict[str, Any]]
+    extra_data: dict[str, Any] | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -34,6 +35,7 @@ class InsightListOut(BaseModel):
 # ---------------------------------------------------------------------------
 # Summary / aggregation schemas (returned by /insights/summary)
 # ---------------------------------------------------------------------------
+
 
 class SentimentBreakdown(BaseModel):
     positive: int
@@ -60,6 +62,7 @@ class InsightSummaryOut(BaseModel):
 # Chat schemas
 # ---------------------------------------------------------------------------
 
+
 class ChatMessage(BaseModel):
     role: str = Field(..., pattern="^(user|assistant)$")
     content: str = Field(..., min_length=1)
@@ -68,6 +71,10 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     business_id: str = Field(..., min_length=1, max_length=255)
     messages: list[ChatMessage] = Field(..., min_length=1)
+    system_type: Literal["vector", "graph"] = Field(
+        default="vector",
+        description="Which RAG system to answer with — see pipelines/registry.py",
+    )
 
 
 class ChatResponse(BaseModel):

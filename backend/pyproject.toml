@@ -43,6 +43,8 @@ dependencies = [
     "ragas>=0.2.0",
     # MCP server
     "fastmcp>=0.4.0",
+    # GraphRAG — in-memory traversal over entities/entity_relationships
+    "networkx>=3.3",
 ]
 
 [dependency-groups]

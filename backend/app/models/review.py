@@ -70,6 +70,14 @@ class Review(Base):
 
     # Processing state
     is_processed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # Set once entity/relationship extraction (GraphRAG indexing) has run for
+    # this review. Deliberately separate from is_processed — extraction is a
+    # distinct, independently-resumable Celery stage (see
+    # pipelines/orchestration/pipeline_runner.py::extract_unprocessed_graph_entities)
+    # so it doesn't compete with the sentiment/embedding rate limit budget.
+    graph_extracted: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

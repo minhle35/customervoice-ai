@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from openai import NotFoundError, RateLimitError
 
-from pipelines.orchestration.pipeline_runner import ingest, process_unprocessed
+from pipelines.orchestration.pipeline_runner import (
+    extract_unprocessed_graph_entities,
+    ingest,
+    process_unprocessed,
+)
 from workers.celery_app import celery_app
 
 # RateLimitError  — don't retry, let the caller use process_unprocessed_reviews later
@@ -33,3 +37,14 @@ def ingest_platform(self, platform: str, business_id: str, params: dict | None =
 )
 def process_unprocessed_reviews(limit: int = 100):
     return process_unprocessed(limit=limit)
+
+
+@celery_app.task(
+    name="extract_graph_entities",
+    autoretry_for=_RETRYABLE,
+    dont_autoretry_for=_NO_RETRY,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+)
+def extract_graph_entities(limit: int = 100):
+    return extract_unprocessed_graph_entities(limit=limit)
